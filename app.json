@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "Bloom",
+    "slug": "cycle-tracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#00897B"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.bloom.cycletracker"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#00897B"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.bloom.cycletracker"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "static"
+    },
+    "scheme": "bloom",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-sqlite",
+        {
+          "enableFTS": true
+        }
+      ],
+      "expo-secure-store",
+      "expo-web-browser",
+      "expo-local-authentication"
+    ]
+  }
+}
