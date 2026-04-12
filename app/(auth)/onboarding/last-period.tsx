@@ -28,6 +28,7 @@ export default function LastPeriodScreen() {
   const [pinError, setPinError] = useState('');
   const [skipPin, setSkipPin] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -59,6 +60,7 @@ export default function LastPeriodScreen() {
   async function handleFinish() {
     if (!validate()) return;
     setSaving(true);
+    setSaveError('');
     try {
       const endDate = parseISO(selectedDate);
       const startDate = subDays(endDate, parseInt(periodDuration ?? '5') - 1);
@@ -77,6 +79,8 @@ export default function LastPeriodScreen() {
       }
 
       router.replace('/(app)/today');
+    } catch (e: any) {
+      setSaveError(e.message ?? 'Failed to save. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -185,6 +189,11 @@ export default function LastPeriodScreen() {
         </View>
 
         <View style={styles.footer}>
+          {!!saveError && (
+            <HelperText type="error" visible style={{ textAlign: 'center' }}>
+              {saveError}
+            </HelperText>
+          )}
           <Button
             mode="contained"
             onPress={handleFinish}

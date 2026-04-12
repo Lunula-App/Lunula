@@ -116,7 +116,7 @@ export function computePrediction(
     daysUntilEarliest,
     daysUntilLatest,
     currentCycleDay: currentDay,
-    phaseDay: currentDay - phaseStartDay + 1,
+    phaseDay: Math.max(1, currentDay - phaseStartDay + 1),
     phaseTotalDays: getPhaseDuration(
       phase,
       settings.avgPeriodDuration,

@@ -103,10 +103,10 @@ export default function CalendarScreen() {
     for (const log of recentLogs) {
       const phase = getPhaseForDate(log.date, settings);
       counts[phase].days += 1;
-      for (const m of log.moods) {
+      for (const m of (log.moods ?? [])) {
         counts[phase].moods.set(m, (counts[phase].moods.get(m) ?? 0) + 1);
       }
-      for (const s of log.symptoms) {
+      for (const s of (log.symptoms ?? [])) {
         counts[phase].symptoms.set(s, (counts[phase].symptoms.get(s) ?? 0) + 1);
       }
     }

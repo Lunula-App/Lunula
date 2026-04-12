@@ -93,14 +93,15 @@ export async function reconcileCycles(logs: DailyLog[]): Promise<void> {
     const lengths = completed.map((c) => c.cycleLength!);
 
     const adaptiveLength = computeAdaptiveCycleLength(completed);
-    const adaptivePeriodDuration = Math.round(
-      completed
-        .filter((c) => c.periodDuration !== null && c.periodDuration! > 0)
-        .reduce((sum, c) => sum + c.periodDuration!, 0) /
-        completed.filter((c) => c.periodDuration !== null && c.periodDuration! > 0).length
+    const completedWithDuration = completed.filter(
+      (c) => c.periodDuration !== null && c.periodDuration! > 0
     );
     settingsUpdate.avgCycleLength = adaptiveLength;
-    if (!isNaN(adaptivePeriodDuration) && adaptivePeriodDuration > 0) {
+    if (completedWithDuration.length > 0) {
+      const adaptivePeriodDuration = Math.round(
+        completedWithDuration.reduce((sum, c) => sum + c.periodDuration!, 0) /
+          completedWithDuration.length
+      );
       settingsUpdate.avgPeriodDuration = adaptivePeriodDuration;
     }
 

@@ -65,15 +65,35 @@ export function deriveKey(passphrase: string, salt: Buffer): Buffer {
   ) as Buffer;
 }
 
+// ── GCM cipher interfaces ─────────────────────────────────────────────────────
+// react-native-quick-crypto's TS types omit GCM-specific methods; these
+// interfaces let us cast to them safely instead of reaching for `as any`.
+
+interface GCMCipher {
+  update(data: string, inputEncoding: string, outputEncoding: string): string;
+  final(outputEncoding: string): string;
+  getAuthTag(): Buffer;
+}
+
+interface GCMDecipher {
+  update(data: string, inputEncoding: string, outputEncoding: string): string;
+  final(outputEncoding: string): string;
+  setAuthTag(tag: Buffer): void;
+}
+
 // ── Encrypt / decrypt ─────────────────────────────────────────────────────────
 
 export function encrypt(plaintext: string, key: Buffer): EncryptedPayload {
   const iv = Crypto.randomBytes(12) as Buffer;
-  const cipher = Crypto.createCipheriv('aes-256-gcm', key, iv);
+  const cipher = Crypto.createCipheriv('aes-256-gcm', key, iv) as unknown as GCMCipher;
 
-  const part1 = cipher.update(plaintext, 'utf8', 'base64') as string;
-  const part2 = cipher.final('base64') as string;
-  const tag = (cipher as any).getAuthTag() as Buffer;
+  const part1 = cipher.update(plaintext, 'utf8', 'base64');
+  const part2 = cipher.final('base64');
+  const tag = cipher.getAuthTag();
+
+  if (!tag || tag.length !== 16) {
+    throw new Error('AES-GCM auth tag has unexpected length — encryption failed');
+  }
 
   return {
     version: 2,
@@ -87,10 +107,13 @@ export function decrypt(payload: EncryptedPayload, key: Buffer): string {
   const iv = Buffer.from(payload.iv, 'base64');
   const tag = Buffer.from(payload.tag, 'base64');
 
-  const decipher = Crypto.createDecipheriv('aes-256-gcm', key, iv);
-  (decipher as any).setAuthTag(tag);
+  if (iv.length !== 12) throw new Error('Invalid IV length for AES-GCM');
+  if (tag.length !== 16) throw new Error('Invalid GCM auth tag length');
 
-  const part1 = decipher.update(payload.ciphertext, 'base64', 'utf8') as string;
-  const part2 = decipher.final('utf8') as string;
+  const decipher = Crypto.createDecipheriv('aes-256-gcm', key, iv) as unknown as GCMDecipher;
+  decipher.setAuthTag(tag);
+
+  const part1 = decipher.update(payload.ciphertext, 'base64', 'utf8');
+  const part2 = decipher.final('utf8');
   return part1 + part2;
 }

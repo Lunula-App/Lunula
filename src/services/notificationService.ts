@@ -52,8 +52,12 @@ export async function requestNotificationPermission(): Promise<boolean> {
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 function parseTime(hhmm: string): { hour: number; minute: number } {
-  const [h, m] = hhmm.split(':').map(Number);
-  return { hour: h ?? 20, minute: m ?? 0 };
+  const parts = hhmm.split(':');
+  const h = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  const hour = Number.isFinite(h) && h >= 0 && h <= 23 ? h : 20;
+  const minute = Number.isFinite(m) && m >= 0 && m <= 59 ? m : 0;
+  return { hour, minute };
 }
 
 async function cancelNotification(id: string) {

@@ -46,6 +46,7 @@ export default function ExercisePlayerScreen() {
   const runRep = useCallback(
     (rep: number, set: number) => {
       if (!exercise) return;
+      clearTimer(); // ensure no stale timer is running before starting a new one
 
       const holdSec = Math.round(exercise.holdDurationMs / 1000);
       const relaxSec = Math.round(exercise.relaxDurationMs / 1000);

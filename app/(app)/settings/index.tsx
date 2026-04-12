@@ -45,9 +45,9 @@ export default function SettingsScreen() {
     setResetting(true);
     try {
       await resetAllData();
-      useSettingsStore.getState().load();
-      useLogStore.getState().loadToday();
-      useAuthStore.getState().checkSetup();
+      await useSettingsStore.getState().load();
+      await useLogStore.getState().loadToday();
+      await useAuthStore.getState().checkSetup();
       router.replace('/(auth)/onboarding/welcome');
     } catch (e: any) {
       Alert.alert('Reset failed', e.message ?? 'Unknown error');
@@ -86,6 +86,13 @@ export default function SettingsScreen() {
         setPassphraseError('Passphrase must be at least 8 characters.');
         return;
       }
+      const hasLetter = /[a-zA-Z]/.test(passphrase);
+      const hasDigit = /[0-9]/.test(passphrase);
+      const hasSymbol = /[^a-zA-Z0-9]/.test(passphrase);
+      if ([hasLetter, hasDigit, hasSymbol].filter(Boolean).length < 2) {
+        setPassphraseError('Passphrase must include at least letters and numbers (or symbols).');
+        return;
+      }
       if (passphrase !== confirmPassphrase) {
         setPassphraseError('Passphrases do not match.');
         return;
@@ -101,6 +108,12 @@ export default function SettingsScreen() {
     setExporting(true);
     try {
       const path = await createBackup(passphrase);
+      // Verify the backup can be decrypted before reporting success
+      try {
+        await readBackup(path, passphrase);
+      } catch {
+        throw new Error('Backup verification failed — the file may be corrupt. Please try again.');
+      }
       const filename = path.split('/').pop();
       Alert.alert(
         'Backup created',
@@ -154,15 +167,16 @@ export default function SettingsScreen() {
     if (!importData) return;
     setImporting(true);
     try {
+      await useAuthStore.getState().removePin(); // clear existing PIN before overwriting data
       await restoreBackup(importData);
-      useSettingsStore.getState().load();
-      useLogStore.getState().loadToday();
-      useAuthStore.getState().checkSetup();
+      await useSettingsStore.getState().load();
+      await useLogStore.getState().loadToday();
+      await useAuthStore.getState().checkSetup();
       setImportStep(null);
       setImportData(null);
       Alert.alert(
         'Restore complete',
-        'Your data has been restored. If you had a PIN set, please set a new one in Security settings.',
+        'Your data has been restored. You can set a new PIN in Security settings.',
         [{ text: 'OK' }]
       );
     } catch (e: any) {

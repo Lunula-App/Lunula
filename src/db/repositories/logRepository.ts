@@ -1,10 +1,24 @@
 import { getDatabase, generateId, nowIso } from '../client';
-import { DailyLog, FlowIntensity, Symptom, Mood, Craving } from '../../models/log';
+import {
+  DailyLog, FlowIntensity, Symptom, Mood, Craving,
+  SYMPTOM_LABELS, MOOD_LABELS, CRAVING_LABELS,
+} from '../../models/log';
 
-function safeParseArray<T>(raw: string | null | undefined): T[] {
+// Derive valid value sets from the label records so there's a single source of truth
+const VALID_SYMPTOMS = new Set<string>(Object.keys(SYMPTOM_LABELS));
+const VALID_MOODS = new Set<string>(Object.keys(MOOD_LABELS));
+const VALID_CRAVINGS = new Set<string>(Object.keys(CRAVING_LABELS));
+
+function safeParseArray<T extends string>(
+  raw: string | null | undefined,
+  validValues: Set<string>
+): T[] {
   try {
     const parsed = JSON.parse(raw || '[]');
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is T =>
+      typeof item === 'string' && validValues.has(item)
+    );
   } catch {
     return [];
   }
@@ -17,9 +31,9 @@ function rowToLog(row: Record<string, unknown>): DailyLog {
     cycleRecordId: row.cycle_record_id as string | null,
     isPeriodDay: Boolean(row.is_period_day),
     flowIntensity: row.flow_intensity as FlowIntensity,
-    symptoms: safeParseArray<Symptom>(row.symptoms as string),
-    moods: safeParseArray<Mood>(row.moods as string),
-    cravings: safeParseArray<Craving>(row.cravings as string),
+    symptoms: safeParseArray<Symptom>(row.symptoms as string, VALID_SYMPTOMS),
+    moods: safeParseArray<Mood>(row.moods as string, VALID_MOODS),
+    cravings: safeParseArray<Craving>(row.cravings as string, VALID_CRAVINGS),
     energyLevel: (row.energy_level as 1 | 2 | 3 | null) ?? null,
     notes: row.notes as string | null,
     createdAt: row.created_at as string,

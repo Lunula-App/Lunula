@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Button, useTheme, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,6 +6,8 @@ import { useAuthStore } from '../../src/stores/authStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 
 const PIN_LENGTH = 6;
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_MS = 30_000;
 
 export default function LockScreen() {
   const theme = useTheme();
@@ -15,12 +17,35 @@ export default function LockScreen() {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [checking, setChecking] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const [lockSecondsLeft, setLockSecondsLeft] = useState(0);
+  const lockTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (biometricEnabled) {
-      tryBiometric();
+      tryBiometric().catch((err) => console.error('Biometric init error:', err));
     }
-  }, []);
+  }, [biometricEnabled]);
+
+  // Countdown timer for lockout
+  useEffect(() => {
+    if (!lockedUntil) return;
+    lockTimerRef.current = setInterval(() => {
+      const remaining = Math.ceil((lockedUntil - Date.now()) / 1000);
+      if (remaining <= 0) {
+        setLockedUntil(null);
+        setLockSecondsLeft(0);
+        setError('');
+        if (lockTimerRef.current) clearInterval(lockTimerRef.current);
+      } else {
+        setLockSecondsLeft(remaining);
+      }
+    }, 500);
+    return () => {
+      if (lockTimerRef.current) clearInterval(lockTimerRef.current);
+    };
+  }, [lockedUntil]);
 
   async function tryBiometric() {
     const success = await unlockWithBiometric();
@@ -30,32 +55,50 @@ export default function LockScreen() {
   }
 
   async function handleDigit(digit: string) {
-    if (pin.length >= PIN_LENGTH) return;
+    if (pin.length >= PIN_LENGTH || checking) return;
+    if (lockedUntil && Date.now() < lockedUntil) return;
     const next = pin + digit;
     setPin(next);
     setError('');
 
-    if (next.length === PIN_LENGTH || next.length >= 4) {
+    if (next.length === PIN_LENGTH) {
       await checkPin(next);
     }
   }
 
   async function checkPin(candidate: string) {
+    if (lockedUntil && Date.now() < lockedUntil) {
+      setPin('');
+      setError(`Too many attempts. Wait ${lockSecondsLeft}s.`);
+      return;
+    }
     setChecking(true);
     const success = await unlockWithPin(candidate);
     if (!success) {
+      const newFailed = failedAttempts + 1;
+      setFailedAttempts(newFailed);
       setPin('');
-      setError('Incorrect PIN. Try again.');
+      if (newFailed >= MAX_ATTEMPTS) {
+        const until = Date.now() + LOCKOUT_MS;
+        setLockedUntil(until);
+        setLockSecondsLeft(Math.ceil(LOCKOUT_MS / 1000));
+        setError(`Too many attempts. Locked for ${Math.ceil(LOCKOUT_MS / 1000)}s.`);
+      } else {
+        const remaining = MAX_ATTEMPTS - newFailed;
+        setError(`Incorrect PIN. ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining.`);
+      }
     }
     setChecking(false);
   }
 
   function handleDelete() {
+    if (lockedUntil && Date.now() < lockedUntil) return;
     setPin((p) => p.slice(0, -1));
     setError('');
   }
 
-  const dots = Array.from({ length: 4 }, (_, i) => i < pin.length);
+  const isLockedOut = !!lockedUntil && Date.now() < lockedUntil;
+  const dots = Array.from({ length: PIN_LENGTH }, (_, i) => i < pin.length);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -127,7 +170,7 @@ export default function LockScreen() {
                     key={key}
                     mode="text"
                     onPress={() => handleDigit(key)}
-                    disabled={checking}
+                    disabled={checking || isLockedOut}
                     style={styles.keyButton}
                     labelStyle={styles.keyLabel}
                   >

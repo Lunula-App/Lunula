@@ -81,7 +81,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
       if (result.success) set({ isUnlocked: true });
       return result.success;
-    } catch {
+    } catch (err) {
+      console.error('Biometric authentication error:', err);
       return false;
     }
   },
