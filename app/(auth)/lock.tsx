@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Button, useTheme, IconButton } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
@@ -105,7 +106,7 @@ export default function LockScreen() {
       <View style={styles.content}>
         <View style={styles.hero}>
           <View style={[styles.circle, { backgroundColor: theme.colors.primaryContainer }]}>
-            <Text style={styles.emoji}>🌸</Text>
+            <MaterialCommunityIcons name="flower-tulip-outline" size={38} color={theme.colors.primary} />
           </View>
           <Text variant="headlineSmall" style={{ color: theme.colors.onBackground, fontWeight: '600' }}>
             Bloom
@@ -204,7 +205,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emoji: { fontSize: 38 },
   dotsRow: { flexDirection: 'row', gap: 20 },
   dot: {
     width: 18,

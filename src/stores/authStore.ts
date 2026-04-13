@@ -33,7 +33,7 @@ async function hashPin(pin: string, salt: string): Promise<string> {
 
 function generateSalt(): string {
   const bytes = Crypto.getRandomValues(new Uint8Array(16));
-  return Buffer.from(bytes).toString('hex');
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({

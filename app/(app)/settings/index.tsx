@@ -7,7 +7,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
-import * as Sharing from 'expo-sharing';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useLogStore } from '../../../src/stores/logStore';
@@ -116,6 +115,7 @@ export default function SettingsScreen() {
         throw new Error('Backup verification failed — the file may be corrupt. Please try again.');
       }
       try {
+        const Sharing = await import('expo-sharing');
         await Sharing.shareAsync(path, {
           mimeType: 'application/octet-stream',
           dialogTitle: 'Save your Bloom backup',
