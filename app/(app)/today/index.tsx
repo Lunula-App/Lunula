@@ -15,7 +15,6 @@ import PhaseCard from '../../../src/components/common/PhaseCard';
 import { getSessionsForDate } from '../../../src/db/repositories/exerciseRepository';
 
 const ENERGY_LABELS: Record<number, string> = { 1: 'Low', 2: 'Moderate', 3: 'High' };
-import { PHASE_DESCRIPTIONS } from '../../../src/models/cycle';
 import { PHASE_COLORS } from '../../../src/theme/colors';
 import { todayDate } from '../../../src/db/client';
 
@@ -65,15 +64,6 @@ export default function TodayScreen() {
 
         {/* Phase Card */}
         {prediction && <PhaseCard prediction={prediction} />}
-
-        {/* Phase description */}
-        {prediction && (
-          <Surface style={[styles.descCard, { backgroundColor: theme.colors.surface }]} elevation={1}>
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurface, lineHeight: 22 }}>
-              {PHASE_DESCRIPTIONS[prediction.currentPhase]}
-            </Text>
-          </Surface>
-        )}
 
         {/* Upcoming events */}
         {prediction && (
@@ -285,7 +275,6 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 100, gap: 20 },
   header: { gap: 4 },
   greeting: { fontWeight: '700' },
-  descCard: { borderRadius: 16, padding: 16 },
   section: { gap: 10 },
   sectionTitle: { fontWeight: '700', letterSpacing: 0.8 },
   logCard: { borderRadius: 16, padding: 16 },

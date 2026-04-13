@@ -7,6 +7,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
+import * as WebBrowser from 'expo-web-browser';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
@@ -308,6 +309,26 @@ export default function SettingsScreen() {
           />
         </Surface>
 
+        {/* Support */}
+        <Surface style={[styles.supportCard, { backgroundColor: theme.colors.primaryContainer }]} elevation={0}>
+          <Text variant="titleSmall" style={{ color: theme.colors.onPrimaryContainer, fontWeight: '700', marginBottom: 4 }}>
+            Support Bloom
+          </Text>
+          <Text variant="bodySmall" style={{ color: theme.colors.onPrimaryContainer, lineHeight: 20, marginBottom: 12 }}>
+            Bloom is free, open source, and built without ads or investors. If you find it useful, a small donation helps keep it going.
+          </Text>
+          <Button
+            mode="contained"
+            onPress={() => WebBrowser.openBrowserAsync('https://ko-fi.com/bloomapp')}
+            buttonColor={theme.colors.primary}
+            textColor={theme.colors.onPrimary}
+            icon="heart-outline"
+            style={{ alignSelf: 'flex-start', borderRadius: 10 }}
+          >
+            Support on Ko-fi
+          </Button>
+        </Surface>
+
         {/* About */}
         <Surface style={[styles.card, { backgroundColor: theme.colors.surface }]} elevation={1}>
           <List.Subheader>About</List.Subheader>
@@ -560,6 +581,7 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32, gap: 14 },
   title: { fontWeight: '700', paddingHorizontal: 4 },
   card: { borderRadius: 16, overflow: 'hidden' },
+  supportCard: { borderRadius: 16, padding: 16 },
   resetButton: { borderRadius: 12, borderWidth: 1.5, marginBottom: 8 },
   dialogContent: { gap: 0 },
   importSummary: { borderRadius: 12, padding: 12, gap: 4 },

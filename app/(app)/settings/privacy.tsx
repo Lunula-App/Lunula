@@ -13,12 +13,12 @@ const PRINCIPLES = [
   {
     icon: 'lock-outline',
     title: 'Backups are encrypted',
-    body: 'Any backup you create is encrypted before it is written to storage. Your passphrase never leaves your device, so without it the backup is unreadable to anyone — including us.',
+    body: 'Any backup you create is encrypted before it is written to storage. Your passphrase never leaves your device, so without it the backup is unreadable to anyone, including us.',
   },
   {
     icon: 'eye-off-outline',
     title: 'No tracking, no data sharing',
-    body: 'Bloom contains no analytics SDKs, no advertising identifiers, and no crash reporters that phone home. Your data is never sold or shared with third parties — for any reason.',
+    body: 'Bloom contains no analytics SDKs, no advertising identifiers, and no crash reporters that phone home. Your data is never sold or shared with third parties, for any reason.',
   },
   {
     icon: 'cellphone-lock',
@@ -55,7 +55,7 @@ export default function PrivacyScreen() {
             Your health data is yours alone
           </Text>
           <Text variant="bodyMedium" style={{ color: theme.colors.onPrimaryContainer, lineHeight: 24, textAlign: 'center' }}>
-            Bloom is built so that data collection is architecturally impossible — not just against our policy.
+            Bloom is built so that data collection is architecturally impossible, not just against our policy.
           </Text>
         </Surface>
 
