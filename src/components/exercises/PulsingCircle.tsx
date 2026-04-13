@@ -107,8 +107,8 @@ export default function PulsingCircle({
 const styles = StyleSheet.create({
   container: { alignItems: 'center', gap: 24 },
   circleWrapper: {
-    width: 220,
-    height: 220,
+    width: 300,
+    height: 300,
     alignItems: 'center',
     justifyContent: 'center',
   },
