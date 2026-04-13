@@ -1,15 +1,44 @@
 import { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { Text, Button, useTheme, Dialog, Portal, TextInput, Surface } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { readBackup, restoreBackup, BackupData } from '../../../src/services/backupService';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { useLogStore } from '../../../src/stores/logStore';
 import { useAuthStore } from '../../../src/stores/authStore';
 
 type ImportStep = 'passphrase' | 'confirm' | null;
+
+const FEATURES: { icon: string; title: string; body: string }[] = [
+  {
+    icon: 'calendar-month-outline',
+    title: 'Cycle tracking and predictions',
+    body: 'Track your period and see predictions for upcoming phases and your next period.',
+  },
+  {
+    icon: 'clipboard-pulse-outline',
+    title: 'Daily logging',
+    body: 'Record symptoms, mood, energy, flow, and cravings to build a picture over time.',
+  },
+  {
+    icon: 'yoga',
+    title: 'Phase-appropriate exercises',
+    body: 'Pelvic floor exercises tailored to where you are in your cycle.',
+  },
+  {
+    icon: 'book-open-variant',
+    title: 'Understand your cycle',
+    body: 'Clear explanations of each phase and what to expect from your body.',
+  },
+  {
+    icon: 'shield-lock-outline',
+    title: 'Fully private by design',
+    body: 'No account, no servers. All data stays on your device. Optional PIN or biometric lock.',
+  },
+];
 
 export default function WelcomeScreen() {
   const theme = useTheme();
@@ -87,37 +116,49 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.content}>
-        <View style={styles.hero}>
-          <View style={[styles.circle, { backgroundColor: theme.colors.primaryContainer }]}>
-            <Text style={[styles.emoji]}>🌸</Text>
-          </View>
-          <Text variant="displaySmall" style={[styles.title, { color: theme.colors.primary }]}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Hero */}
+        <Surface style={[styles.heroCard, { backgroundColor: theme.colors.primaryContainer }]} elevation={0}>
+          <MaterialCommunityIcons
+            name="flower-tulip-outline"
+            size={44}
+            color={theme.colors.primary}
+            style={{ marginBottom: 14 }}
+          />
+          <Text variant="displaySmall" style={[styles.appName, { color: theme.colors.primary }]}>
             Bloom
           </Text>
-          <Text variant="bodyLarge" style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>
+          <Text variant="bodyMedium" style={[styles.tagline, { color: theme.colors.onPrimaryContainer }]}>
             Your private cycle companion.{'\n'}All data stays on your device.
           </Text>
-        </View>
+        </Surface>
 
-        <View style={styles.features}>
-          {FEATURES.map((f) => (
-            <View key={f.text} style={styles.featureRow}>
-              <Text style={styles.featureIcon}>{f.icon}</Text>
-              <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-                {f.text}
+        {/* Features */}
+        {FEATURES.map((f) => (
+          <Surface
+            key={f.title}
+            style={[styles.featureCard, { backgroundColor: theme.colors.surface }]}
+            elevation={1}
+          >
+            <MaterialCommunityIcons name={f.icon as any} size={24} color={theme.colors.primary} />
+            <View style={styles.featureText}>
+              <Text variant="titleSmall" style={{ color: theme.colors.onBackground, fontWeight: '700', marginBottom: 2 }}>
+                {f.title}
+              </Text>
+              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, lineHeight: 20 }}>
+                {f.body}
               </Text>
             </View>
-          ))}
-        </View>
+          </Surface>
+        ))}
 
-        <Text
-          variant="bodySmall"
-          style={[styles.privacy, { color: theme.colors.onSurfaceVariant }]}
-        >
+        <Text variant="bodySmall" style={[styles.privacy, { color: theme.colors.onSurfaceVariant }]}>
           No account needed. No data ever leaves your device without your permission.
         </Text>
-      </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <Button
@@ -229,33 +270,26 @@ export default function WelcomeScreen() {
   );
 }
 
-const FEATURES = [
-  { icon: '📅', text: 'Track your cycle and predict future periods' },
-  { icon: '💊', text: 'Log symptoms, mood, energy, and cravings' },
-  { icon: '🧘', text: 'Phase-appropriate pelvic floor exercises' },
-  { icon: '📚', text: 'Learn about each phase of your cycle' },
-  { icon: '🔒', text: 'Fully private — protected by PIN or biometrics' },
-];
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { flex: 1, paddingHorizontal: 28, paddingTop: 40, justifyContent: 'space-between' },
-  hero: { alignItems: 'center', gap: 16 },
-  circle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+  scroll: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 16, gap: 12 },
+  heroCard: {
+    borderRadius: 20,
+    padding: 28,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  emoji: { fontSize: 56 },
-  title: { fontWeight: '700', letterSpacing: -0.5 },
-  subtitle: { textAlign: 'center', lineHeight: 24 },
-  features: { gap: 16 },
-  featureRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  featureIcon: { fontSize: 22, width: 32, textAlign: 'center' },
-  privacy: { textAlign: 'center', lineHeight: 18 },
+  appName: { fontWeight: '700', letterSpacing: -0.5, marginBottom: 10 },
+  tagline: { textAlign: 'center', lineHeight: 24 },
+  featureCard: {
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 14,
+  },
+  featureText: { flex: 1 },
+  privacy: { textAlign: 'center', lineHeight: 18, paddingHorizontal: 8, paddingTop: 4 },
   footer: { padding: 24, paddingBottom: 32 },
   button: { borderRadius: 28 },
   buttonContent: { paddingVertical: 8 },

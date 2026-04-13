@@ -1,5 +1,5 @@
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, useTheme, Surface, List, Switch, Divider, Button } from 'react-native-paper';
+import { Text, useTheme, Surface, List, Divider, Button, SegmentedButtons } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -13,8 +13,7 @@ export default function AppearanceScreen() {
   const router = useRouter();
   const { settings, update } = useSettingsStore();
 
-  const isDark = settings?.darkMode === 'dark';
-  const isSystem = settings?.darkMode === 'system';
+  const darkMode = settings?.darkMode ?? 'system';
   const currentAccent = (settings?.accentColor ?? 'teal') as AccentKey;
 
   return (
@@ -33,32 +32,17 @@ export default function AppearanceScreen() {
         <Surface style={[styles.card, { backgroundColor: theme.colors.surface }]} elevation={1}>
           <List.Subheader>Theme</List.Subheader>
           <Divider />
-          <List.Item
-            title="Use System Theme"
-            description="Follow your device's light/dark setting"
-            left={(props) => <List.Icon {...props} icon="cellphone" />}
-            right={() => (
-              <Switch
-                value={isSystem}
-                onValueChange={(val) => { if (val) update({ darkMode: 'system' }); }}
-                color={theme.colors.primary}
-              />
-            )}
-          />
-          <Divider />
-          <List.Item
-            title="Dark Mode"
-            description="Always use dark theme"
-            left={(props) => <List.Icon {...props} icon="theme-light-dark" />}
-            right={() => (
-              <Switch
-                value={isDark}
-                onValueChange={(val) => update({ darkMode: val ? 'dark' : 'light' })}
-                color={theme.colors.primary}
-                disabled={isSystem}
-              />
-            )}
-          />
+          <View style={styles.segmentedRow}>
+            <SegmentedButtons
+              value={darkMode}
+              onValueChange={(val) => update({ darkMode: val as 'light' | 'dark' | 'system' })}
+              buttons={[
+                { value: 'light', label: 'Light', icon: 'white-balance-sunny' },
+                { value: 'system', label: 'System', icon: 'cellphone' },
+                { value: 'dark', label: 'Dark', icon: 'moon-waning-crescent' },
+              ]}
+            />
+          </View>
         </Surface>
 
         {/* Accent colour */}
@@ -114,6 +98,7 @@ const styles = StyleSheet.create({
   title: { fontWeight: '700', flex: 1 },
   content: { paddingHorizontal: 16, paddingTop: 24, gap: 14 },
   card: { borderRadius: 16, overflow: 'hidden' },
+  segmentedRow: { padding: 16 },
   swatchGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

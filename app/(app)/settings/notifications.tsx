@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, StyleSheet, ScrollView, Modal, TouchableOpacity, FlatList } from 'react-native';
-import { Text, useTheme, Surface, List, Switch, Divider, Button } from 'react-native-paper';
+import { Text, useTheme, Surface, List, Switch, Divider, Button, MD3Theme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
@@ -205,7 +205,7 @@ function TimePicker({
   value: string;
   onConfirm: (val: string) => void;
   onCancel: () => void;
-  theme: ReturnType<typeof useTheme>;
+  theme: MD3Theme;
 }) {
   const [h, m] = value.split(':').map(Number);
   const [selectedHour, setSelectedHour] = useState(h ?? 20);

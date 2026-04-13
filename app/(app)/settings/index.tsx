@@ -7,6 +7,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
+import * as Sharing from 'expo-sharing';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useLogStore } from '../../../src/stores/logStore';
@@ -68,7 +69,7 @@ export default function SettingsScreen() {
     });
   }, [settings]);
 
-  const isDark = settings?.darkMode === 'dark'; // used for Appearance description
+  const themeLabel = settings?.darkMode === 'dark' ? 'Dark' : settings?.darkMode === 'light' ? 'Light' : 'System';
   const isAdaptive = completedCycles >= 3;
 
   async function openExportDialog() {
@@ -114,12 +115,21 @@ export default function SettingsScreen() {
       } catch {
         throw new Error('Backup verification failed — the file may be corrupt. Please try again.');
       }
-      const filename = path.split('/').pop();
-      Alert.alert(
-        'Backup created',
-        `Encrypted backup saved to your device.\n\nFile: ${filename}\n\nYour passphrase is required to restore this backup.`,
-        [{ text: 'OK' }]
-      );
+      try {
+        await Sharing.shareAsync(path, {
+          mimeType: 'application/octet-stream',
+          dialogTitle: 'Save your Bloom backup',
+          UTI: 'public.data',
+        });
+      } catch {
+        // Sharing not supported on this device — show file location instead
+        const filename = path.split('/').pop();
+        Alert.alert(
+          'Backup created',
+          `Encrypted backup saved to your device.\n\nFile: ${filename}\n\nYour passphrase is required to restore this backup.`,
+          [{ text: 'OK' }]
+        );
+      }
     } catch (e: any) {
       Alert.alert('Export failed', e.message ?? 'Unknown error');
     } finally {
@@ -228,7 +238,7 @@ export default function SettingsScreen() {
           <Divider />
           <List.Item
             title="Appearance"
-            description={`${settings?.darkMode === 'system' ? 'System' : isDark ? 'Dark' : 'Light'} · ${ACCENTS[(settings?.accentColor ?? 'teal') as AccentKey]?.label ?? 'Teal'}`}
+            description={`${themeLabel} · ${ACCENTS[(settings?.accentColor ?? 'teal') as AccentKey]?.label ?? 'Teal'}`}
             left={(props) => <List.Icon {...props} icon="theme-light-dark" />}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
             onPress={() => router.push('/(app)/settings/appearance')}

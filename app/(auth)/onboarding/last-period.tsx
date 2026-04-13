@@ -5,6 +5,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
 import { format, subDays, parseISO } from 'date-fns';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { useAuthStore } from '../../../src/stores/authStore';
 
@@ -26,7 +27,7 @@ export default function LastPeriodScreen() {
   const [pin, setPin] = useState('');
   const [pinConfirm, setPinConfirm] = useState('');
   const [pinError, setPinError] = useState('');
-  const [skipPin, setSkipPin] = useState(false);
+  const [pinEnabled, setPinEnabled] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
 
@@ -42,7 +43,7 @@ export default function LastPeriodScreen() {
       setDateError('');
     }
 
-    if (!skipPin) {
+    if (pinEnabled) {
       if (pin.length < 4) {
         setPinError('PIN must be at least 4 digits');
         valid = false;
@@ -74,7 +75,7 @@ export default function LastPeriodScreen() {
         onboardingComplete: true,
       });
 
-      if (!skipPin && pin.length >= 4) {
+      if (pinEnabled && pin.length >= 4) {
         await setupPin(pin);
       }
 
@@ -128,7 +129,7 @@ export default function LastPeriodScreen() {
                 >
                   {selectedDate ? displayDate : 'Select date'}
                 </Text>
-                <Text style={{ fontSize: 20 }}>📅</Text>
+                <MaterialCommunityIcons name="calendar-month-outline" size={22} color={theme.colors.onSurfaceVariant} />
               </View>
             </Surface>
           </TouchableOpacity>
@@ -148,7 +149,20 @@ export default function LastPeriodScreen() {
             Optional — keeps your data private if someone picks up your phone.
           </Text>
 
-          {!skipPin && (
+          <Button
+            mode={pinEnabled ? 'outlined' : 'contained-tonal'}
+            onPress={() => {
+              setPinEnabled((v) => !v);
+              setPin('');
+              setPinConfirm('');
+              setPinError('');
+            }}
+            style={{ alignSelf: 'flex-start', marginTop: 4 }}
+          >
+            {pinEnabled ? 'Disable PIN' : 'Enable PIN protection'}
+          </Button>
+
+          {pinEnabled && (
             <>
               <TextInput
                 label="Choose a PIN (4–6 digits)"
@@ -158,7 +172,6 @@ export default function LastPeriodScreen() {
                 secureTextEntry
                 maxLength={6}
                 mode="outlined"
-                style={{ marginTop: 12 }}
               />
               <TextInput
                 label="Confirm PIN"
@@ -168,7 +181,6 @@ export default function LastPeriodScreen() {
                 secureTextEntry
                 maxLength={6}
                 mode="outlined"
-                style={{ marginTop: 8 }}
                 error={!!pinError}
               />
               {!!pinError && (
@@ -178,14 +190,6 @@ export default function LastPeriodScreen() {
               )}
             </>
           )}
-
-          <Button
-            mode="text"
-            onPress={() => setSkipPin((v) => !v)}
-            style={{ alignSelf: 'flex-start' }}
-          >
-            {skipPin ? 'Add a PIN instead' : 'Skip — no PIN'}
-          </Button>
         </View>
 
         <View style={styles.footer}>

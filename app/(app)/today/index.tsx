@@ -81,12 +81,20 @@ export default function TodayScreen() {
               </View>
             )}
             <View style={styles.eventRow}>
-              {prediction.isIrregular && prediction.daysUntilEarliest !== null && prediction.daysUntilLatest !== null ? (
-                <EventChip
-                  label={`Next period: ${prediction.daysUntilEarliest}–${prediction.daysUntilLatest} days away`}
-                  icon="calendar-range"
-                  color={PHASE_COLORS.menstrual}
-                />
+              {prediction.isIrregular ? (
+                prediction.daysUntilEarliest !== null && prediction.daysUntilLatest !== null ? (
+                  <EventChip
+                    label={`Next period: ${prediction.daysUntilEarliest}–${prediction.daysUntilLatest} days away`}
+                    icon="calendar-range"
+                    color={PHASE_COLORS.menstrual}
+                  />
+                ) : (
+                  <EventChip
+                    label="Next period timing varies — log more cycles to narrow this down"
+                    icon="calendar-range"
+                    color={PHASE_COLORS.menstrual}
+                  />
+                )
               ) : (
                 <EventChip
                   label={`Next period ${formatUpcoming(prediction.nextPeriodDate)}`}
