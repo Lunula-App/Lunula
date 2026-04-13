@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Button, useTheme, Surface } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { computePrediction } from '../../../src/services/cycleEngine';
 import { getExerciseById } from '../../../src/content/exercises/definitions';
@@ -13,7 +13,7 @@ import { CyclePhase } from '../../../src/models/cycle';
 import { PHASE_COLORS } from '../../../src/theme/colors';
 
 type SessionState = 'preview' | 'running' | 'complete';
-type AnimPhase = 'hold' | 'relax' | 'idle';
+type AnimPhase = 'hold' | 'relax' | 'rest' | 'idle';
 
 export default function ExercisePlayerScreen() {
   const theme = useTheme();
@@ -71,9 +71,10 @@ export default function ExercisePlayerScreen() {
               setSetsCompleted(set);
               setSessionState('complete');
             } else {
-              // Rest between sets (use relaxDuration)
-              setAnimPhase('relax');
-              let restRemaining = relaxSec;
+              // Rest between sets — longer dedicated rest
+              const setRestSec = Math.round(exercise.setRestDurationMs / 1000);
+              setAnimPhase('rest');
+              let restRemaining = setRestSec;
               setCountdown(restRemaining);
               timerRef.current = setInterval(() => {
                 restRemaining -= 1;
@@ -118,20 +119,38 @@ export default function ExercisePlayerScreen() {
     setCurrentSet(1);
   }
 
-  async function handleFinish() {
+  const savedRef = useRef(false);
+
+  async function saveSession() {
+    if (savedRef.current || !exercise || sessionState !== 'complete') return;
+    savedRef.current = true;
     const duration = Math.round((Date.now() - startTime) / 1000);
-    if (exercise) {
-      await saveExerciseSession({
-        date: todayDate(),
-        exerciseId: exercise.id,
-        setsCompleted,
-        repsCompleted: setsCompleted * exercise.reps,
-        durationSeconds: duration,
-        notes: null,
-      });
-    }
-    router.back();
+    await saveExerciseSession({
+      date: todayDate(),
+      exerciseId: exercise.id,
+      setsCompleted,
+      repsCompleted: setsCompleted * exercise.reps,
+      durationSeconds: duration,
+      notes: null,
+    });
   }
+
+  async function handleFinish() {
+    await saveSession();
+    router.navigate('/(app)/exercises');
+  }
+
+  // Auto-save if the user navigates away while on the complete screen
+  useFocusEffect(
+    useCallback(() => {
+      savedRef.current = false;
+      return () => {
+        if (sessionState === 'complete') {
+          saveSession();
+        }
+      };
+    }, [sessionState, exercise, setsCompleted, startTime])
+  );
 
   useEffect(() => () => clearTimer(), []);
 
@@ -144,7 +163,11 @@ export default function ExercisePlayerScreen() {
   }
 
   const phaseColor = PHASE_COLORS[currentPhase];
-  const cue = animPhase === 'hold' ? exercise.breathingCue : animPhase === 'relax' ? exercise.relaxCue : 'Ready?';
+  const cue =
+    animPhase === 'hold' ? exercise.breathingCue :
+    animPhase === 'relax' ? exercise.relaxCue :
+    animPhase === 'rest' ? 'Take a breath — next set coming up' :
+    'Ready?';
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -218,7 +241,9 @@ export default function ExercisePlayerScreen() {
       {sessionState === 'running' && (
         <View style={styles.runningContainer}>
           <Text variant="labelMedium" style={[styles.setLabel, { color: theme.colors.onSurfaceVariant }]}>
-            SET {currentSet} OF {exercise.sets}
+            {animPhase === 'rest'
+              ? `REST — SET ${currentSet} OF ${exercise.sets} COMPLETE`
+              : `SET ${currentSet} OF ${exercise.sets}`}
           </Text>
 
           <PulsingCircle

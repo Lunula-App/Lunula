@@ -23,6 +23,8 @@ export interface UserSettings {
   notifyPeriodDaysBefore: number;
   notifyKegel: boolean;
   notifyKegelTime: string;           // HH:MM
+  notifyBackup: boolean;
+  notifyBackupIntervalWeeks: 1 | 2 | 4;
   createdAt: string;
   updatedAt: string;
 }

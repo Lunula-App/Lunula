@@ -20,6 +20,7 @@ import { computePrediction } from './cycleEngine';
 const ID_DAILY_LOG = 'bloom_daily_log';
 const ID_PERIOD_REMINDER = 'bloom_period_reminder';
 const ID_KEGEL = 'bloom_kegel';
+const ID_BACKUP_PREFIX = 'bloom_backup_';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -115,6 +116,38 @@ async function schedulePeriodReminder(settings: UserSettings) {
   });
 }
 
+async function cancelBackupReminders() {
+  // Cancel all previously scheduled backup notifications (up to 12 slots)
+  await Promise.all(
+    Array.from({ length: 12 }, (_, i) =>
+      Notifications.cancelScheduledNotificationAsync(`${ID_BACKUP_PREFIX}${i}`).catch(() => {})
+    )
+  );
+}
+
+async function scheduleBackupReminders(intervalWeeks: 1 | 2 | 4) {
+  await cancelBackupReminders();
+  const intervalMs = intervalWeeks * 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  // Schedule 12 occurrences so reminders run for up to a year without re-registration
+  for (let i = 0; i < 12; i++) {
+    const fireDate = new Date(now + intervalMs * (i + 1));
+    fireDate.setHours(9, 0, 0, 0);
+    if (fireDate.getTime() <= Date.now()) continue;
+    await Notifications.scheduleNotificationAsync({
+      identifier: `${ID_BACKUP_PREFIX}${i}`,
+      content: {
+        title: 'Bloom backup reminder',
+        body: 'Back up your Bloom data to keep it safe. It only takes a moment.',
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: fireDate,
+      },
+    });
+  }
+}
+
 async function scheduleKegel(time: string) {
   await cancelNotification(ID_KEGEL);
   const { hour, minute } = parseTime(time);
@@ -156,6 +189,12 @@ export async function syncNotifications(settings: UserSettings): Promise<void> {
   } else {
     await cancelNotification(ID_KEGEL);
   }
+
+  if (settings.notifyBackup) {
+    await scheduleBackupReminders(settings.notifyBackupIntervalWeeks);
+  } else {
+    await cancelBackupReminders();
+  }
 }
 
 /** Cancels every Bloom notification (used when permissions are revoked). */
@@ -164,5 +203,6 @@ export async function cancelAllNotifications(): Promise<void> {
     cancelNotification(ID_DAILY_LOG),
     cancelNotification(ID_PERIOD_REMINDER),
     cancelNotification(ID_KEGEL),
+    cancelBackupReminders(),
   ]);
 }

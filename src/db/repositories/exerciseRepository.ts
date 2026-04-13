@@ -58,3 +58,46 @@ export async function getRecentSessions(limitDays = 30): Promise<ExerciseSession
   );
   return rows.map(rowToSession);
 }
+
+/** Returns the set of distinct dates (YYYY-MM-DD) that have at least one session. */
+export async function getSessionDateSet(): Promise<Set<string>> {
+  const db = getDatabase();
+  const rows = await db.getAllAsync<{ date: string }>(
+    'SELECT DISTINCT date FROM exercise_sessions'
+  );
+  return new Set(rows.map((r) => r.date));
+}
+
+/** Calculates current consecutive-day streak ending today. */
+export function calculateStreak(sessionDates: Set<string>): number {
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setUTCDate(today.getUTCDate() - i);
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    if (sessionDates.has(`${y}-${m}-${day}`)) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+/** Returns the last N date strings (YYYY-MM-DD) ending today, oldest first. */
+export function lastNDates(n: number): string[] {
+  const dates: string[] = [];
+  const today = new Date();
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setUTCDate(today.getUTCDate() - i);
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    dates.push(`${y}-${m}-${day}`);
+  }
+  return dates;
+}

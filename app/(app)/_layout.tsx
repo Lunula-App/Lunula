@@ -1,10 +1,15 @@
+import { useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { useTheme } from 'react-native-paper';
 import { Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useExerciseStore } from '../../src/stores/exerciseStore';
 
 export default function AppLayout() {
   const theme = useTheme();
+  const { streak, load } = useExerciseStore();
+
+  useEffect(() => { load(); }, []);
 
   return (
     <Tabs
@@ -24,7 +29,7 @@ export default function AppLayout() {
       }}
     >
       <Tabs.Screen
-        name="today/index"
+        name="today"
         options={{
           title: 'Today',
           tabBarIcon: ({ color, size }) => (
@@ -42,7 +47,7 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
-        name="cycle-info/index"
+        name="cycle-info"
         options={{
           title: 'Learn',
           tabBarIcon: ({ color, size }) => (
@@ -51,16 +56,18 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
-        name="exercises/index"
+        name="exercises"
         options={{
           title: 'Exercises',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="yoga" size={size} color={color} />
           ),
+          tabBarBadge: streak >= 2 ? streak : undefined,
+          tabBarBadgeStyle: { fontSize: 10 },
         }}
       />
       <Tabs.Screen
-        name="settings/index"
+        name="settings"
         options={{
           title: 'Settings',
           tabBarIcon: ({ color, size }) => (
@@ -68,15 +75,6 @@ export default function AppLayout() {
           ),
         }}
       />
-      {/* Hidden screens */}
-      <Tabs.Screen name="today/log-entry" options={{ href: null }} />
-      <Tabs.Screen name="cycle-info/article/[slug]" options={{ href: null }} />
-      <Tabs.Screen name="exercises/[exerciseId]" options={{ href: null }} />
-      <Tabs.Screen name="settings/profile" options={{ href: null }} />
-      <Tabs.Screen name="settings/security" options={{ href: null }} />
-      <Tabs.Screen name="settings/notifications" options={{ href: null }} />
-      <Tabs.Screen name="settings/appearance" options={{ href: null }} />
-      <Tabs.Screen name="settings/privacy" options={{ href: null }} />
     </Tabs>
   );
 }

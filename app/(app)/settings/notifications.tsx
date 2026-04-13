@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, StyleSheet, ScrollView, Modal, TouchableOpacity, FlatList } from 'react-native';
-import { Text, useTheme, Surface, List, Switch, Divider, Button, MD3Theme } from 'react-native-paper';
+import { Text, useTheme, Surface, List, Switch, Divider, Button, MD3Theme, SegmentedButtons } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
@@ -22,7 +22,7 @@ export default function NotificationsScreen() {
   if (!settings) return null;
 
   async function toggle(
-    field: keyof Pick<UserSettings, 'notifyDailyLog' | 'notifyPeriodReminder' | 'notifyKegel'>,
+    field: keyof Pick<UserSettings, 'notifyDailyLog' | 'notifyPeriodReminder' | 'notifyKegel' | 'notifyBackup'>,
     value: boolean
   ) {
     if (value) {
@@ -33,7 +33,7 @@ export default function NotificationsScreen() {
     await update({ [field]: value });
     await syncNotifications({ ...settings!, ...updated });
 
-    if (!updated.notifyDailyLog && !updated.notifyPeriodReminder && !updated.notifyKegel) {
+    if (!updated.notifyDailyLog && !updated.notifyPeriodReminder && !updated.notifyKegel && !updated.notifyBackup) {
       await cancelAllNotifications();
     }
   }
@@ -169,6 +169,48 @@ export default function NotificationsScreen() {
                 right={(props) => <List.Icon {...props} icon="chevron-right" />}
                 onPress={() => setTimePicker({ field: 'notifyKegelTime', value: settings.notifyKegelTime })}
               />
+            </>
+          )}
+        </Surface>
+
+        {/* Backup reminder */}
+        <Surface style={[styles.card, { backgroundColor: theme.colors.surface }]} elevation={1}>
+          <List.Subheader>Data Backup</List.Subheader>
+          <Divider />
+          <List.Item
+            title="Backup reminder"
+            description="Remind you to export and back up your data"
+            left={(props) => <List.Icon {...props} icon="database-export-outline" />}
+            right={() => (
+              <Switch
+                value={settings.notifyBackup}
+                onValueChange={(val) => toggle('notifyBackup', val)}
+                color={theme.colors.primary}
+              />
+            )}
+          />
+          {settings.notifyBackup && (
+            <>
+              <Divider />
+              <View style={styles.intervalRow}>
+                <Text variant="bodyMedium" style={{ color: theme.colors.onSurface, fontWeight: '500' }}>
+                  Remind every
+                </Text>
+                <SegmentedButtons
+                  value={String(settings.notifyBackupIntervalWeeks)}
+                  onValueChange={async (val) => {
+                    const weeks = parseInt(val, 10) as 1 | 2 | 4;
+                    await update({ notifyBackupIntervalWeeks: weeks });
+                    await syncNotifications({ ...settings, notifyBackupIntervalWeeks: weeks });
+                  }}
+                  buttons={[
+                    { value: '1', label: '1 week' },
+                    { value: '2', label: '2 weeks' },
+                    { value: '4', label: '4 weeks' },
+                  ]}
+                  style={styles.intervalSegmented}
+                />
+              </View>
             </>
           )}
         </Surface>
@@ -322,4 +364,6 @@ const styles = StyleSheet.create({
   pickerList: { height: 200 },
   pickerItem: { paddingVertical: 12, alignItems: 'center' },
   modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 16 },
+  intervalRow: { paddingHorizontal: 16, paddingVertical: 12, gap: 10 },
+  intervalSegmented: {},
 });

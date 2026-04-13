@@ -1,11 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Text, useTheme, Surface, Chip, SegmentedButtons } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { computePrediction } from '../../../src/services/cycleEngine';
 import { getExercisesForPhase, EXERCISES } from '../../../src/content/exercises/definitions';
+import { getSessionsForDate } from '../../../src/db/repositories/exerciseRepository';
+import { todayDate } from '../../../src/db/client';
+import { useExerciseStore } from '../../../src/stores/exerciseStore';
 import { ExerciseDefinition } from '../../../src/models/exercise';
 import { PHASE_COLORS } from '../../../src/theme/colors';
 import { CyclePhase } from '../../../src/models/cycle';
@@ -23,6 +27,17 @@ export default function ExercisesScreen() {
   const router = useRouter();
   const { settings } = useSettingsStore();
   const [level, setLevel] = useState<'beginner' | 'all'>('all');
+  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
+  const { streak, last7, sessionDates, load: loadStreak } = useExerciseStore();
+
+  useFocusEffect(
+    useCallback(() => {
+      getSessionsForDate(todayDate()).then((sessions) => {
+        setCompletedIds(new Set(sessions.map((s) => s.exerciseId)));
+      });
+      loadStreak();
+    }, [])
+  );
 
   const { phase, exercises } = useMemo(() => {
     if (!settings) return { phase: 'follicular' as CyclePhase, exercises: [] };
@@ -60,11 +75,52 @@ export default function ExercisesScreen() {
           </Text>
         </Surface>
 
-        {/* Tutorial card — always visible */}
-        <Text variant="titleSmall" style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant }]}>
-          NEW HERE?
-        </Text>
-        <ExerciseCard exercise={tutorial} phaseColor="#78909C" onPress={() => navTo(tutorial.id)} />
+        {/* Streak card */}
+        <Surface style={[styles.streakCard, { backgroundColor: theme.colors.surface }]} elevation={1}>
+          <View style={styles.streakHeader}>
+            <MaterialCommunityIcons name="fire" size={20} color={phaseColor} />
+            <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+              {streak === 0
+                ? 'No streak yet — exercise today to start one'
+                : streak === 1
+                ? '1 day streak — keep it going!'
+                : `${streak} day streak`}
+            </Text>
+          </View>
+          <View style={styles.dotsRow}>
+            {last7.map((date, i) => {
+              const done = sessionDates.has(date);
+              const isToday = i === 6;
+              return (
+                <View key={date} style={styles.dotCol}>
+                  <View
+                    style={[
+                      styles.streakDot,
+                      {
+                        backgroundColor: done ? phaseColor : theme.colors.surfaceVariant,
+                        borderColor: isToday ? phaseColor : 'transparent',
+                        borderWidth: isToday ? 2 : 0,
+                      },
+                    ]}
+                  />
+                  <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, fontSize: 9 }}>
+                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'][new Date(date + 'T00:00:00').getDay() === 0 ? 6 : new Date(date + 'T00:00:00').getDay() - 1]}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </Surface>
+
+        {/* Tutorial card — hidden once completed */}
+        {!completedIds.has(tutorial.id) && (
+          <>
+            <Text variant="titleSmall" style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant }]}>
+              NEW HERE?
+            </Text>
+            <ExerciseCard exercise={tutorial} phaseColor="#78909C" onPress={() => navTo(tutorial.id)} completed={false} />
+          </>
+        )}
 
         {/* Level filter */}
         <Text variant="titleSmall" style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant }]}>
@@ -86,6 +142,7 @@ export default function ExercisesScreen() {
             exercise={ex}
             phaseColor={phaseColor}
             onPress={() => navTo(ex.id)}
+            completed={completedIds.has(ex.id)}
           />
         ))}
       </ScrollView>
@@ -97,14 +154,17 @@ function ExerciseCard({
   exercise,
   phaseColor,
   onPress,
+  completed,
 }: {
   exercise: ExerciseDefinition;
   phaseColor: string;
   onPress: () => void;
+  completed: boolean;
 }) {
   const theme = useTheme();
   const holdSec = Math.round(exercise.holdDurationMs / 1000);
   const relaxSec = Math.round(exercise.relaxDurationMs / 1000);
+  const DONE_COLOR = '#4CAF50';
 
   return (
     <Pressable onPress={onPress}>
@@ -114,7 +174,7 @@ function ExerciseCard({
             styles.card,
             {
               backgroundColor: pressed ? theme.colors.surfaceVariant : theme.colors.surface,
-              borderColor: phaseColor + '44',
+              borderColor: completed ? DONE_COLOR + '66' : phaseColor + '44',
             },
           ]}
           elevation={1}
@@ -124,15 +184,31 @@ function ExerciseCard({
               <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '600' }}>
                 {exercise.name}
               </Text>
-              <Chip
-                compact
-                style={[styles.diffChip, { backgroundColor: DIFFICULTY_COLORS[exercise.difficulty] + '22' }]}
-                textStyle={{ color: DIFFICULTY_COLORS[exercise.difficulty], fontSize: 11 }}
-              >
-                {exercise.difficulty}
-              </Chip>
+              <View style={styles.chipsRow}>
+                <Chip
+                  compact
+                  style={[styles.diffChip, { backgroundColor: DIFFICULTY_COLORS[exercise.difficulty] + '22' }]}
+                  textStyle={{ color: DIFFICULTY_COLORS[exercise.difficulty], fontSize: 11 }}
+                >
+                  {exercise.difficulty}
+                </Chip>
+                {completed && (
+                  <Chip
+                    compact
+                    icon={() => <MaterialCommunityIcons name="check-circle" size={13} color={DONE_COLOR} />}
+                    style={[styles.diffChip, { backgroundColor: DONE_COLOR + '22' }]}
+                    textStyle={{ color: DONE_COLOR, fontSize: 11 }}
+                  >
+                    Done today
+                  </Chip>
+                )}
+              </View>
             </View>
-            <Text style={styles.arrowIcon}>›</Text>
+            <MaterialCommunityIcons
+              name={completed ? 'check-circle' : 'chevron-right'}
+              size={24}
+              color={completed ? DONE_COLOR : theme.colors.onSurfaceVariant}
+            />
           </View>
 
           <Text
@@ -187,12 +263,17 @@ const styles = StyleSheet.create({
   title: { fontWeight: '700' },
   phaseChip: {},
   infoCard: { borderRadius: 16, padding: 16 },
+  streakCard: { borderRadius: 16, padding: 16, gap: 12 },
+  streakHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dotsRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  dotCol: { alignItems: 'center', gap: 4, flex: 1 },
+  streakDot: { width: 28, height: 28, borderRadius: 14 },
   sectionLabel: { fontWeight: '700', letterSpacing: 0.8, paddingHorizontal: 4 },
   segmented: { marginBottom: 4 },
   card: { borderRadius: 16, padding: 16, gap: 10, borderWidth: 1.5 },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  diffChip: { alignSelf: 'flex-start', marginTop: 4 },
-  arrowIcon: { fontSize: 24, color: '#9E9E9E', lineHeight: 32 },
+  chipsRow: { flexDirection: 'row', gap: 6, marginTop: 4, flexWrap: 'wrap' },
+  diffChip: { alignSelf: 'flex-start' },
   statsRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
   badge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, alignItems: 'center', minWidth: 52 },
 });

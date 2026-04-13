@@ -6,14 +6,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 
-const PIN_LENGTH = 6;
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 30_000;
 
 export default function LockScreen() {
   const theme = useTheme();
-  const { unlockWithPin, unlockWithBiometric, biometricAvailable } = useAuthStore();
+  const { unlockWithPin, unlockWithBiometric, biometricAvailable, pinLength } = useAuthStore();
   const { settings } = useSettingsStore();
+  const PIN_LENGTH = pinLength;
   const biometricEnabled = biometricAvailable && (settings?.biometricEnabled ?? false);
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');

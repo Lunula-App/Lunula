@@ -7,28 +7,23 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 const PRINCIPLES = [
   {
     icon: 'database-off-outline',
-    title: 'No servers, no accounts',
-    body: 'Bloom has no backend. There is no account to create, no server to send your data to, and no company database storing your health information. Everything lives on your device.',
+    title: 'Everything stays on your device',
+    body: 'Bloom has no backend, no accounts, and no outbound connections. Your cycle data never leaves your device unless you choose to export it.',
   },
   {
     icon: 'lock-outline',
-    title: 'Encrypted at rest',
-    body: 'Any backup you create is encrypted with AES-256-GCM before it is written to storage. Only someone with your passphrase can read it — including us, which means we cannot.',
+    title: 'Backups are encrypted',
+    body: 'Any backup you create is encrypted before it is written to storage. Your passphrase never leaves your device, so without it the backup is unreadable to anyone — including us.',
   },
   {
     icon: 'eye-off-outline',
-    title: 'No tracking or analytics',
-    body: 'Bloom contains no analytics SDKs, no crash reporters that phone home, and no advertising identifiers. We do not know how you use the app, and we do not want to.',
-  },
-  {
-    icon: 'account-off-outline',
-    title: 'No data sold, ever',
-    body: 'Menstrual health data is among the most sensitive personal information that exists. It will never be sold, shared with third parties, or used for any purpose beyond running the app on your device.',
+    title: 'No tracking, no data sharing',
+    body: 'Bloom contains no analytics SDKs, no advertising identifiers, and no crash reporters that phone home. Your data is never sold or shared with third parties — for any reason.',
   },
   {
     icon: 'cellphone-lock',
     title: 'You are in control',
-    body: 'Your data belongs to you. You can export it, delete it, or reset the app entirely at any time. There are no retention policies because there is no data held anywhere but in your hands.',
+    body: 'Export, delete, or reset your data at any time. There are no retention policies because there is nothing held anywhere but on your device.',
   },
 ];
 
@@ -56,14 +51,11 @@ export default function PrivacyScreen() {
             color={theme.colors.primary}
             style={{ marginBottom: 12 }}
           />
-          <Text variant="titleMedium" style={{ color: theme.colors.onPrimaryContainer, fontWeight: '700', marginBottom: 8 }}>
+          <Text variant="titleMedium" style={{ color: theme.colors.onPrimaryContainer, fontWeight: '700', marginBottom: 8, textAlign: 'center' }}>
             Your health data is yours alone
           </Text>
-          <Text variant="bodyMedium" style={{ color: theme.colors.onPrimaryContainer, lineHeight: 24 }}>
-            We built Bloom at a time when health apps routinely harvest intimate personal data — selling it to insurers, advertisers, and data brokers — often buried in terms of service nobody reads.
-          </Text>
-          <Text variant="bodyMedium" style={{ color: theme.colors.onPrimaryContainer, lineHeight: 24, marginTop: 10 }}>
-            Bloom is different by design, not by policy. The architecture makes data collection impossible: there are no servers, no accounts, and no outbound connections. Your cycle data never leaves your device unless you choose to export it.
+          <Text variant="bodyMedium" style={{ color: theme.colors.onPrimaryContainer, lineHeight: 24, textAlign: 'center' }}>
+            Bloom is built so that data collection is architecturally impossible — not just against our policy.
           </Text>
         </Surface>
 
@@ -85,11 +77,6 @@ export default function PrivacyScreen() {
             </View>
           </Surface>
         ))}
-
-        {/* Footer note */}
-        <Text variant="bodySmall" style={[styles.footer, { color: theme.colors.onSurfaceVariant }]}>
-          Bloom is open to independent security review. If you have questions about how the app handles data, the source is available for inspection.
-        </Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -104,7 +91,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
-    textAlign: 'center',
   },
   principleCard: {
     borderRadius: 16,
@@ -114,5 +100,4 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   principleText: { flex: 1 },
-  footer: { textAlign: 'center', lineHeight: 20, paddingHorizontal: 8, paddingTop: 4 },
 });

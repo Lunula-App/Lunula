@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
 import {
   Text, useTheme, Surface, List, Divider,
   ActivityIndicator, Dialog, Portal, Button, TextInput,
@@ -7,6 +7,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as IntentLauncher from 'expo-intent-launcher';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useLogStore } from '../../../src/stores/logStore';
@@ -114,21 +116,48 @@ export default function SettingsScreen() {
       } catch {
         throw new Error('Backup verification failed — the file may be corrupt. Please try again.');
       }
-      try {
+      const filename = path.split('/').pop()!;
+
+      if (Platform.OS === 'ios') {
+        // iOS: native share sheet — dynamic import avoids loading the native
+        // module on Android builds where ExpoSharing isn't registered
         const Sharing = await import('expo-sharing');
         await Sharing.shareAsync(path, {
           mimeType: 'application/octet-stream',
-          dialogTitle: 'Save your Bloom backup',
           UTI: 'public.data',
+          dialogTitle: 'Save Bloom backup',
         });
-      } catch {
-        // Sharing not supported on this device — show file location instead
-        const filename = path.split('/').pop();
-        Alert.alert(
-          'Backup created',
-          `Encrypted backup saved to your device.\n\nFile: ${filename}\n\nYour passphrase is required to restore this backup.`,
-          [{ text: 'OK' }]
-        );
+      } else {
+        // Android: convert to content:// URI and fire ACTION_SEND share sheet
+        // (Drive, Nextcloud, email, etc.)
+        try {
+          const contentUri = await FileSystem.getContentUriAsync(path);
+          await IntentLauncher.startActivityAsync('android.intent.action.SEND', {
+            type: 'application/octet-stream',
+            extra: {
+              'android.intent.extra.STREAM': contentUri,
+              'android.intent.extra.SUBJECT': 'Bloom backup',
+            },
+            flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
+          });
+        } catch {
+          // Fallback: SAF folder picker
+          const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+          if (permissions.granted) {
+            const content = await FileSystem.readAsStringAsync(path, {
+              encoding: FileSystem.EncodingType.UTF8,
+            });
+            const destUri = await FileSystem.StorageAccessFramework.createFileAsync(
+              permissions.directoryUri,
+              filename,
+              'application/octet-stream'
+            );
+            await FileSystem.writeAsStringAsync(destUri, content, {
+              encoding: FileSystem.EncodingType.UTF8,
+            });
+            Alert.alert('Backup saved', 'Your encrypted backup has been saved to the selected folder.');
+          }
+        }
       }
     } catch (e: any) {
       Alert.alert('Export failed', e.message ?? 'Unknown error');
@@ -288,12 +317,29 @@ export default function SettingsScreen() {
             description="Bloom 1.0.0 (MVP)"
             left={(props) => <List.Icon {...props} icon="information" />}
           />
+          <Divider />
           <List.Item
             title="Privacy"
             description="How Bloom protects your data"
             left={(props) => <List.Icon {...props} icon="shield-check-outline" />}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
             onPress={() => router.push('/(app)/settings/privacy')}
+          />
+          <Divider />
+          <List.Item
+            title="Open Source"
+            description="Bloom's code is publicly available for anyone to inspect"
+            left={(props) => <List.Icon {...props} icon="scale-balance" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/(app)/settings/licenses')}
+          />
+          <Divider />
+          <List.Item
+            title="Send Feedback"
+            description="Bug reports and suggestions"
+            left={(props) => <List.Icon {...props} icon="message-text-outline" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/(app)/settings/feedback')}
           />
         </Surface>
 

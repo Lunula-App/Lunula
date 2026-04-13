@@ -25,6 +25,8 @@ function rowToSettings(row: Record<string, unknown>): UserSettings {
     notifyPeriodDaysBefore: (row.notify_period_days_before as number) ?? 2,
     notifyKegel: Boolean(row.notify_kegel),
     notifyKegelTime: (row.notify_kegel_time as string) ?? '09:00',
+    notifyBackup: Boolean(row.notify_backup),
+    notifyBackupIntervalWeeks: ((row.notify_backup_interval_weeks as number) ?? 2) as 1 | 2 | 4,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
@@ -57,8 +59,9 @@ export async function saveSettings(
         notify_period_reminder, notify_period_days_before,
         notify_kegel, notify_kegel_time,
         is_irregular, min_cycle_length, max_cycle_length,
+        notify_backup, notify_backup_interval_weeks,
         created_at, updated_at
-      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         partial.avgCycleLength ?? 28,
         partial.avgPeriodDuration ?? 5,
@@ -81,6 +84,8 @@ export async function saveSettings(
         partial.isIrregular ? 1 : 0,
         partial.minCycleLength ?? null,
         partial.maxCycleLength ?? null,
+        partial.notifyBackup ? 1 : 0,
+        partial.notifyBackupIntervalWeeks ?? 2,
         now,
         now,
       ]
@@ -99,6 +104,7 @@ export async function saveSettings(
         notify_period_reminder = ?, notify_period_days_before = ?,
         notify_kegel = ?, notify_kegel_time = ?,
         is_irregular = ?, min_cycle_length = ?, max_cycle_length = ?,
+        notify_backup = ?, notify_backup_interval_weeks = ?,
         updated_at = ?
       WHERE id = 1`,
       [
@@ -123,6 +129,8 @@ export async function saveSettings(
         merged.isIrregular ? 1 : 0,
         merged.minCycleLength ?? null,
         merged.maxCycleLength ?? null,
+        merged.notifyBackup ? 1 : 0,
+        merged.notifyBackupIntervalWeeks,
         now,
       ]
     );

@@ -42,6 +42,8 @@ export async function initDatabase(): Promise<void> {
     `ALTER TABLE user_settings ADD COLUMN is_irregular INTEGER NOT NULL DEFAULT 0`,
     `ALTER TABLE user_settings ADD COLUMN min_cycle_length INTEGER`,
     `ALTER TABLE user_settings ADD COLUMN max_cycle_length INTEGER`,
+    `ALTER TABLE user_settings ADD COLUMN notify_backup INTEGER NOT NULL DEFAULT 0`,
+    `ALTER TABLE user_settings ADD COLUMN notify_backup_interval_weeks INTEGER NOT NULL DEFAULT 2`,
   ];
 
   for (const migration of migrations) {

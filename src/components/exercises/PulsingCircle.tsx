@@ -6,13 +6,12 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   Easing,
-  runOnJS,
 } from 'react-native-reanimated';
 import { CyclePhase } from '../../models/cycle';
 import { PHASE_COLORS } from '../../theme/colors';
 
 interface Props {
-  phase: 'hold' | 'relax' | 'idle';
+  phase: 'hold' | 'relax' | 'rest' | 'idle';
   cyclePhase: CyclePhase;
   holdDurationMs: number;
   relaxDurationMs: number;
@@ -49,6 +48,10 @@ export default function PulsingCircle({
         easing: Easing.inOut(Easing.ease),
       });
       opacity.value = withTiming(0.6, { duration: 300 });
+    } else if (phase === 'rest') {
+      // Settle to a gentle idle pulse during set rest
+      scale.value = withTiming(0.9, { duration: 600, easing: Easing.out(Easing.ease) });
+      opacity.value = withTiming(0.4, { duration: 600 });
     } else {
       scale.value = withTiming(1, { duration: 400 });
       opacity.value = withTiming(0.5, { duration: 400 });
@@ -61,6 +64,7 @@ export default function PulsingCircle({
   }));
 
   const isHolding = phase === 'hold';
+  const isResting = phase === 'rest';
 
   return (
     <View style={styles.container}>
@@ -74,7 +78,7 @@ export default function PulsingCircle({
         {/* Text sits on top, outside the animated view, so it never scales */}
         <View style={styles.textOverlay} pointerEvents="none">
           <Text style={styles.countdownText}>{countdown}</Text>
-          <Text style={styles.phaseText}>{isHolding ? 'HOLD' : phase === 'relax' ? 'RELAX' : ''}</Text>
+          <Text style={styles.phaseText}>{isHolding ? 'HOLD' : isResting ? 'REST' : phase === 'relax' ? 'RELAX' : ''}</Text>
         </View>
       </View>
 

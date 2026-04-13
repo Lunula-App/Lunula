@@ -6,6 +6,7 @@ import * as Crypto from 'expo-crypto';
 const KEYS = {
   PIN_HASH: 'bloom_pin_hash',
   PIN_SALT: 'bloom_pin_salt',
+  PIN_LENGTH: 'bloom_pin_length',
 };
 
 const LOCK_AFTER_BG_MS = 60_000; // 1 minute
@@ -13,6 +14,7 @@ const LOCK_AFTER_BG_MS = 60_000; // 1 minute
 interface AuthState {
   isUnlocked: boolean;
   hasPinSetup: boolean;
+  pinLength: number;
   biometricAvailable: boolean;
   // Actions
   checkSetup: () => Promise<void>;
@@ -39,17 +41,20 @@ function generateSalt(): string {
 export const useAuthStore = create<AuthState>((set, get) => ({
   isUnlocked: false,
   hasPinSetup: false,
+  pinLength: 4,
   biometricAvailable: false,
 
   checkSetup: async () => {
     const pinHash = await SecureStore.getItemAsync(KEYS.PIN_HASH);
     const hasPinSetup = !!pinHash;
+    const storedLength = await SecureStore.getItemAsync(KEYS.PIN_LENGTH);
+    const pinLength = storedLength ? parseInt(storedLength, 10) : 4;
 
     const bioResult = await LocalAuthentication.hasHardwareAsync();
     const enrolled = await LocalAuthentication.isEnrolledAsync();
     const biometricAvailable = bioResult && enrolled;
 
-    set({ hasPinSetup, biometricAvailable });
+    set({ hasPinSetup, pinLength, biometricAvailable });
 
     // If no PIN is set up, treat as unlocked (first launch before onboarding)
     if (!hasPinSetup) {
@@ -92,13 +97,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const hash = await hashPin(pin, salt);
     await SecureStore.setItemAsync(KEYS.PIN_HASH, hash);
     await SecureStore.setItemAsync(KEYS.PIN_SALT, salt);
-    set({ hasPinSetup: true, isUnlocked: true });
+    await SecureStore.setItemAsync(KEYS.PIN_LENGTH, String(pin.length));
+    set({ hasPinSetup: true, pinLength: pin.length, isUnlocked: true });
   },
 
   removePin: async (): Promise<void> => {
     await SecureStore.deleteItemAsync(KEYS.PIN_HASH);
     await SecureStore.deleteItemAsync(KEYS.PIN_SALT);
-    set({ hasPinSetup: false, isUnlocked: true });
+    await SecureStore.deleteItemAsync(KEYS.PIN_LENGTH);
+    set({ hasPinSetup: false, pinLength: 4, isUnlocked: true });
   },
 
   lock: () => set({ isUnlocked: false }),

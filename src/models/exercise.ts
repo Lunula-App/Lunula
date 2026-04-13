@@ -22,6 +22,7 @@ export interface ExerciseDefinition {
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   holdDurationMs: number;
   relaxDurationMs: number;
+  setRestDurationMs: number;  // rest between sets (longer than rep relax)
   reps: number;
   sets: number;
   breathingCue: string;
