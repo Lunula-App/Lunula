@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, Platform, TouchableOpacity } from 'react-native';
 import {
   Text, useTheme, Surface, List, Divider,
-  ActivityIndicator, Dialog, Portal, Button, TextInput,
+  ActivityIndicator, Dialog, Portal, Button, TextInput, Checkbox,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import * as WebBrowser from 'expo-web-browser';
 import * as FileSystem from 'expo-file-system/legacy';
-import * as IntentLauncher from 'expo-intent-launcher';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useLogStore } from '../../../src/stores/logStore';
@@ -39,12 +38,11 @@ export default function SettingsScreen() {
 
   // Reset dialog state
   const [resetVisible, setResetVisible] = useState(false);
-  const [resetConfirmText, setResetConfirmText] = useState('');
+  const [resetAcknowledged, setResetAcknowledged] = useState(false);
   const [resetting, setResetting] = useState(false);
-  const resetReady = resetConfirmText === 'I Understand';
 
   async function handleReset() {
-    if (!resetReady) return;
+    if (!resetAcknowledged) return;
     setResetting(true);
     try {
       await resetAllData();
@@ -84,6 +82,10 @@ export default function SettingsScreen() {
   }
 
   async function handleExport() {
+    if (!passphrase) {
+      setPassphraseError('Please enter your passphrase.');
+      return;
+    }
     if (isNewPassphrase) {
       if (passphrase.length < 8) {
         setPassphraseError('Passphrase must be at least 8 characters.');
@@ -96,15 +98,10 @@ export default function SettingsScreen() {
         setPassphraseError('Passphrase must include at least letters and numbers (or symbols).');
         return;
       }
-      if (passphrase !== confirmPassphrase) {
-        setPassphraseError('Passphrases do not match.');
-        return;
-      }
-    } else {
-      if (!passphrase) {
-        setPassphraseError('Please enter your passphrase.');
-        return;
-      }
+    }
+    if (passphrase !== confirmPassphrase) {
+      setPassphraseError('Passphrases do not match.');
+      return;
     }
 
     setDialogVisible(false);
@@ -120,8 +117,7 @@ export default function SettingsScreen() {
       const filename = path.split('/').pop()!;
 
       if (Platform.OS === 'ios') {
-        // iOS: native share sheet — dynamic import avoids loading the native
-        // module on Android builds where ExpoSharing isn't registered
+        // iOS: native share sheet
         const Sharing = await import('expo-sharing');
         await Sharing.shareAsync(path, {
           mimeType: 'application/octet-stream',
@@ -129,35 +125,21 @@ export default function SettingsScreen() {
           dialogTitle: 'Save Bloom backup',
         });
       } else {
-        // Android: convert to content:// URI and fire ACTION_SEND share sheet
-        // (Drive, Nextcloud, email, etc.)
-        try {
-          const contentUri = await FileSystem.getContentUriAsync(path);
-          await IntentLauncher.startActivityAsync('android.intent.action.SEND', {
-            type: 'application/octet-stream',
-            extra: {
-              'android.intent.extra.STREAM': contentUri,
-              'android.intent.extra.SUBJECT': 'Bloom backup',
-            },
-            flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
+        // Android: SAF directory picker — user chooses exactly where to save
+        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (permissions.granted) {
+          const content = await FileSystem.readAsStringAsync(path, {
+            encoding: FileSystem.EncodingType.UTF8,
           });
-        } catch {
-          // Fallback: SAF folder picker
-          const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-          if (permissions.granted) {
-            const content = await FileSystem.readAsStringAsync(path, {
-              encoding: FileSystem.EncodingType.UTF8,
-            });
-            const destUri = await FileSystem.StorageAccessFramework.createFileAsync(
-              permissions.directoryUri,
-              filename,
-              'application/octet-stream'
-            );
-            await FileSystem.writeAsStringAsync(destUri, content, {
-              encoding: FileSystem.EncodingType.UTF8,
-            });
-            Alert.alert('Backup saved', 'Your encrypted backup has been saved to the selected folder.');
-          }
+          const destUri = await FileSystem.StorageAccessFramework.createFileAsync(
+            permissions.directoryUri,
+            filename,
+            'application/octet-stream'
+          );
+          await FileSystem.writeAsStringAsync(destUri, content, {
+            encoding: FileSystem.EncodingType.UTF8,
+          });
+          Alert.alert('Backup saved', `${filename} has been saved to your chosen folder.`);
         }
       }
     } catch (e: any) {
@@ -368,7 +350,7 @@ export default function SettingsScreen() {
         <Button
           mode="outlined"
           icon="delete-forever"
-          onPress={() => { setResetConfirmText(''); setResetVisible(true); }}
+          onPress={() => { setResetAcknowledged(false); setResetVisible(true); }}
           style={[styles.resetButton, { borderColor: theme.colors.error }]}
           labelStyle={{ color: theme.colors.error }}
         >
@@ -401,18 +383,20 @@ export default function SettingsScreen() {
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurface, fontWeight: '600', marginBottom: 12 }}>
               This cannot be undone. If you have an encrypted backup, you will need your passphrase to restore it.
             </Text>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 8 }}>
-              Type <Text style={{ fontWeight: '700', color: theme.colors.onSurface }}>I Understand</Text> to confirm.
-            </Text>
-            <TextInput
-              value={resetConfirmText}
-              onChangeText={setResetConfirmText}
-              mode="outlined"
-              autoCapitalize="words"
-              placeholder="I Understand"
-              disabled={resetting}
-              autoFocus
-            />
+            <TouchableOpacity
+              onPress={() => !resetting && setResetAcknowledged((v) => !v)}
+              style={styles.checkboxRow}
+              activeOpacity={0.7}
+            >
+              <Checkbox
+                status={resetAcknowledged ? 'checked' : 'unchecked'}
+                color={theme.colors.error}
+                disabled={resetting}
+              />
+              <Text variant="bodySmall" style={{ color: theme.colors.onSurface, flex: 1 }}>
+                I understand this cannot be undone
+              </Text>
+            </TouchableOpacity>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setResetVisible(false)} disabled={resetting}>
@@ -423,7 +407,7 @@ export default function SettingsScreen() {
               buttonColor={theme.colors.error}
               textColor={theme.colors.onError}
               onPress={handleReset}
-              disabled={!resetReady || resetting}
+              disabled={!resetAcknowledged || resetting}
               loading={resetting}
             >
               Reset
@@ -456,17 +440,15 @@ export default function SettingsScreen() {
               mode="outlined"
               autoCapitalize="none"
             />
-            {isNewPassphrase && (
-              <TextInput
-                label="Confirm passphrase"
-                value={confirmPassphrase}
-                onChangeText={(t) => { setConfirmPassphrase(t); setPassphraseError(''); }}
-                secureTextEntry
-                mode="outlined"
-                autoCapitalize="none"
-                style={{ marginTop: 12 }}
-              />
-            )}
+            <TextInput
+              label="Confirm passphrase"
+              value={confirmPassphrase}
+              onChangeText={(t) => { setConfirmPassphrase(t); setPassphraseError(''); }}
+              secureTextEntry
+              mode="outlined"
+              autoCapitalize="none"
+              style={{ marginTop: 12 }}
+            />
             {!!passphraseError && (
               <Text variant="bodySmall" style={{ color: theme.colors.error, marginTop: 8 }}>
                 {passphraseError}
@@ -585,4 +567,5 @@ const styles = StyleSheet.create({
   resetButton: { borderRadius: 12, borderWidth: 1.5, marginBottom: 8 },
   dialogContent: { gap: 0 },
   importSummary: { borderRadius: 12, padding: 12, gap: 4 },
+  checkboxRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
 });

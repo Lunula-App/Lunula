@@ -4,8 +4,15 @@ import { Text, useTheme, Surface, Button, SegmentedButtons, TextInput } from 're
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as MailComposer from 'expo-mail-composer';
 import Constants from 'expo-constants';
+
+// Dynamic import — expo-mail-composer requires a native build
+let MailComposer: typeof import('expo-mail-composer') | null = null;
+try {
+  MailComposer = require('expo-mail-composer');
+} catch {
+  // Native module not available in this build
+}
 
 type FeedbackType = 'bug' | 'suggestion' | 'general';
 
@@ -33,6 +40,7 @@ export default function FeedbackScreen() {
 
     setSending(true);
     try {
+      if (!MailComposer) { setUnavailable(true); return; }
       const isAvailable = await MailComposer.isAvailableAsync();
       if (!isAvailable) {
         setUnavailable(true);
