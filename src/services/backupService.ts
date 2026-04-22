@@ -1,9 +1,9 @@
 /**
- * Backup / restore service for Bloom.
+ * Backup / restore service for Lunula.
  *
  * Backup file format (version 2):
  * {
- *   bloomBackup: 2,
+ *   lunulaBackup: 2,
  *   createdAt: ISO string,
  *   salt: base64,           // PBKDF2 salt — safe to store publicly
  *   payload: EncryptedPayload
@@ -46,7 +46,7 @@ export interface BackupData {
 }
 
 export interface BackupFile {
-  bloomBackup: number;
+  lunulaBackup: number;
   createdAt: string;
   salt: string;           // base64 PBKDF2 salt
   payload: EncryptedPayload;
@@ -78,13 +78,13 @@ export async function createBackup(passphrase: string): Promise<string> {
   const payload = encrypt(JSON.stringify(data), key);
 
   const file: BackupFile = {
-    bloomBackup: BACKUP_FILE_VERSION,
+    lunulaBackup: BACKUP_FILE_VERSION,
     createdAt: new Date().toISOString(),
     salt: salt.toString('base64'),
     payload,
   };
 
-  const filename = `bloom_backup_${Date.now()}.bloom`;
+  const filename = `lunula_backup_${Date.now()}.lunula`;
   const path = `${FileSystem.documentDirectory}${filename}`;
   await FileSystem.writeAsStringAsync(path, JSON.stringify(file), {
     encoding: FileSystem.EncodingType.UTF8,
@@ -114,11 +114,11 @@ export async function readBackup(
   try {
     file = JSON.parse(content);
   } catch {
-    throw new Error('File is not a valid Bloom backup.');
+    throw new Error('File is not a valid Lunula backup.');
   }
 
-  if (file.bloomBackup !== BACKUP_FILE_VERSION) {
-    throw new Error(`Unsupported backup version: ${file.bloomBackup}`);
+  if (file.lunulaBackup !== BACKUP_FILE_VERSION) {
+    throw new Error(`Unsupported backup version: ${file.lunulaBackup}`);
   }
 
   if (!file.salt) {
@@ -264,12 +264,12 @@ export async function restoreBackup(data: BackupData): Promise<void> {
 }
 
 /**
- * Lists all .bloom backup files saved in the document directory.
+ * Lists all .lunula backup files saved in the document directory.
  */
 export async function listLocalBackups(): Promise<FileSystem.FileInfo[]> {
   const dir = FileSystem.documentDirectory!;
   const files = await FileSystem.readDirectoryAsync(dir);
-  const backupFiles = files.filter((f) => f.endsWith('.bloom'));
+  const backupFiles = files.filter((f) => f.endsWith('.lunula'));
 
   const infos = await Promise.all(
     backupFiles.map((f) => FileSystem.getInfoAsync(dir + f))

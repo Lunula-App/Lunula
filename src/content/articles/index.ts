@@ -167,7 +167,7 @@ export const ARTICLES: Article[] = [
       { type: 'bullet_list', items: ['Menstrual: lower core temp aids sleep onset, but cramps and discomfort disrupt it', 'Follicular: lowest progesterone — often the best sleep quality of the cycle', 'Ovulatory: LH surge may cause brief insomnia in some people', 'Luteal: elevated temperature, REM sleep reduction, night sweats possible in late phase'] },
       { type: 'heading', text: 'Improving luteal phase sleep' },
       { type: 'bullet_list', items: ['Keep bedroom cool (16–19°C) to counteract elevated core temp', 'Avoid alcohol — it fragments sleep and worsens night sweats', 'Magnesium glycinate before bed may ease sleep onset', 'Consistent wake time anchors circadian rhythm regardless of cycle phase'] },
-      { type: 'tip', text: 'Tracking your sleep quality alongside your cycle in Bloom can help you identify your personal pattern and plan accordingly.' },
+      { type: 'tip', text: 'Tracking your sleep quality alongside your cycle in Lunula can help you identify your personal pattern and plan accordingly.' },
     ],
   },
 

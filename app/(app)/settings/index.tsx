@@ -122,7 +122,7 @@ export default function SettingsScreen() {
         await Sharing.shareAsync(path, {
           mimeType: 'application/octet-stream',
           UTI: 'public.data',
-          dialogTitle: 'Save Bloom backup',
+          dialogTitle: 'Save Lunula backup',
         });
       } else {
         // Android: SAF directory picker — user chooses exactly where to save
@@ -156,8 +156,8 @@ export default function SettingsScreen() {
     });
     if (result.canceled || !result.assets?.length) return;
     const asset = result.assets[0];
-    if (!asset.name.endsWith('.bloom')) {
-      Alert.alert('Invalid file', 'Please select a .bloom backup file created by Bloom.');
+    if (!asset.name.endsWith('.lunula')) {
+      Alert.alert('Invalid file', 'Please select a .lunula backup file created by Lunula.');
       return;
     }
     setImportFilePath(asset.uri);
@@ -284,7 +284,7 @@ export default function SettingsScreen() {
           <Divider />
           <List.Item
             title="Restore from Backup"
-            description="Restore data from a .bloom file"
+            description="Restore data from a .lunula file"
             left={(props) => <List.Icon {...props} icon="database-import" />}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
             onPress={handlePickBackupFile}
@@ -294,10 +294,10 @@ export default function SettingsScreen() {
         {/* Support */}
         <Surface style={[styles.supportCard, { backgroundColor: theme.colors.primaryContainer }]} elevation={0}>
           <Text variant="titleSmall" style={{ color: theme.colors.onPrimaryContainer, fontWeight: '700', marginBottom: 4 }}>
-            Support Bloom
+            Support Lunula
           </Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onPrimaryContainer, lineHeight: 20, marginBottom: 12 }}>
-            Bloom is free, open source, and built without ads or investors. If you find it useful, a small donation helps keep it going.
+            Lunula is free, open source, and built without ads or investors. If you find it useful, a small donation helps keep it going.
           </Text>
           <Button
             mode="contained"
@@ -317,13 +317,13 @@ export default function SettingsScreen() {
           <Divider />
           <List.Item
             title="App Version"
-            description="Bloom 1.0.0 (MVP)"
+            description="Lunula 1.0.0 (MVP)"
             left={(props) => <List.Icon {...props} icon="information" />}
           />
           <Divider />
           <List.Item
             title="Privacy"
-            description="How Bloom protects your data"
+            description="How Lunula protects your data"
             left={(props) => <List.Icon {...props} icon="shield-check-outline" />}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
             onPress={() => router.push('/(app)/settings/privacy')}
@@ -331,7 +331,7 @@ export default function SettingsScreen() {
           <Divider />
           <List.Item
             title="Open Source"
-            description="Bloom's code is publicly available for anyone to inspect"
+            description="Lunula's code is publicly available for anyone to inspect"
             left={(props) => <List.Icon {...props} icon="scale-balance" />}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
             onPress={() => router.push('/(app)/settings/licenses')}

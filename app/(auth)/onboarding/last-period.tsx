@@ -12,10 +12,12 @@ import { useAuthStore } from '../../../src/stores/authStore';
 export default function LastPeriodScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { cycleLength, periodDuration, isIrregular } = useLocalSearchParams<{
+  const { cycleLength, periodDuration, isIrregular, minCycleLength, maxCycleLength } = useLocalSearchParams<{
     cycleLength: string;
     periodDuration: string;
     isIrregular: string;
+    minCycleLength: string;
+    maxCycleLength: string;
   }>();
 
   const { update: updateSettings } = useSettingsStore();
@@ -66,12 +68,17 @@ export default function LastPeriodScreen() {
       const endDate = parseISO(selectedDate);
       const startDate = subDays(endDate, parseInt(periodDuration ?? '5') - 1);
 
+      const irregular = isIrregular === '1';
       await updateSettings({
-        avgCycleLength: parseInt(cycleLength ?? '28'),
+        avgCycleLength: irregular
+          ? Math.round((parseInt(minCycleLength ?? '21') + parseInt(maxCycleLength ?? '35')) / 2)
+          : parseInt(cycleLength ?? '28'),
         avgPeriodDuration: parseInt(periodDuration ?? '5'),
         lastPeriodEndDate: format(endDate, 'yyyy-MM-dd'),
         lastPeriodStartDate: format(startDate, 'yyyy-MM-dd'),
-        isIrregular: isIrregular === '1',
+        isIrregular: irregular,
+        minCycleLength: irregular ? parseInt(minCycleLength ?? '21') : null,
+        maxCycleLength: irregular ? parseInt(maxCycleLength ?? '35') : null,
         onboardingComplete: true,
       });
 
@@ -99,7 +106,7 @@ export default function LastPeriodScreen() {
             Last Period
           </Text>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            When did your last period end? This lets Bloom calculate your current phase.
+            When did your last period end? This lets Lunula calculate your current phase.
           </Text>
         </View>
 

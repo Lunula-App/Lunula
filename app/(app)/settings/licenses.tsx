@@ -8,7 +8,7 @@ const BLOOM_LICENSE = {
   spdx: 'GPL-3.0-or-later',
   label: 'GNU General Public License v3.0',
   summary:
-    'Bloom is free software. You are free to use, study, modify, and distribute it under the terms of the GNU GPL v3. Any derivative work must also be released under the same licence. The complete source code is publicly available.',
+    'Lunula is free software. You are free to use, study, modify, and distribute it under the terms of the GNU GPL v3. Any derivative work must also be released under the same licence. The complete source code is publicly available.',
 };
 
 interface Dependency {
@@ -70,7 +70,7 @@ export default function LicensesScreen() {
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
-        {/* Bloom's own licence */}
+        {/* Lunula's own licence */}
         <Surface style={[styles.heroCard, { backgroundColor: theme.colors.primaryContainer }]} elevation={0}>
           <MaterialCommunityIcons
             name="scale-balance"
@@ -79,7 +79,7 @@ export default function LicensesScreen() {
             style={{ marginBottom: 10 }}
           />
           <Text variant="titleMedium" style={{ color: theme.colors.onPrimaryContainer, fontWeight: '700', textAlign: 'center', marginBottom: 4 }}>
-            Bloom
+            Lunula
           </Text>
           <View style={[styles.badge, { backgroundColor: LICENSE_COLORS['GPL-3.0-or-later'] + '33' }]}>
             <Text variant="labelSmall" style={{ color: LICENSE_COLORS['GPL-3.0-or-later'], fontWeight: '700' }}>

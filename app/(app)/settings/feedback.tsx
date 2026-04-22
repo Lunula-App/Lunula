@@ -22,7 +22,7 @@ const FEEDBACK_TYPES: { value: FeedbackType; label: string }[] = [
   { value: 'general', label: 'General' },
 ];
 
-const FEEDBACK_EMAIL = 'feedback@bloom-app.com';
+const FEEDBACK_EMAIL = 'feedback@lunula.app';
 
 export default function FeedbackScreen() {
   const theme = useTheme();
@@ -48,9 +48,9 @@ export default function FeedbackScreen() {
       }
 
       const subjectMap: Record<FeedbackType, string> = {
-        bug: 'Bloom – Bug Report',
-        suggestion: 'Bloom – Suggestion',
-        general: 'Bloom – Feedback',
+        bug: 'Lunula – Bug Report',
+        suggestion: 'Lunula – Suggestion',
+        general: 'Lunula – Feedback',
       };
 
       const deviceInfo = [
@@ -94,7 +94,7 @@ export default function FeedbackScreen() {
             style={{ marginBottom: 10 }}
           />
           <Text variant="titleMedium" style={{ color: theme.colors.onPrimaryContainer, fontWeight: '700', textAlign: 'center', marginBottom: 6 }}>
-            Help us improve Bloom
+            Help us improve Lunula
           </Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onPrimaryContainer, lineHeight: 20, textAlign: 'center' }}>
             Your message opens in your email client. No data is collected or transmitted without you explicitly sending it.

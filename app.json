@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Bloom",
-    "slug": "cycle-tracker",
+    "name": "Lunula",
+    "slug": "lunula",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,9 +14,9 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.bloom.cycletracker",
+      "bundleIdentifier": "com.lunula.app",
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Bloom uses Face ID to protect access to your health data."
+        "NSFaceIDUsageDescription": "Lunula uses Face ID to protect access to your health data."
       }
     },
     "android": {
@@ -26,7 +26,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.bloom.cycletracker",
+      "package": "com.lunula.app",
       "permissions": [
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT",
@@ -38,7 +38,7 @@
       "bundler": "metro",
       "output": "static"
     },
-    "scheme": "bloom",
+    "scheme": "lunula",
     "plugins": [
       "expo-router",
       [

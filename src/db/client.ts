@@ -13,7 +13,7 @@ export function getDatabase(): SQLite.SQLiteDatabase {
 export async function initDatabase(): Promise<void> {
   if (db) return;
 
-  db = await SQLite.openDatabaseAsync('bloom.db', {
+  db = await SQLite.openDatabaseAsync('lunula.db', {
     useNewConnection: false,
   });
 

@@ -2,9 +2,9 @@ import * as SecureStore from 'expo-secure-store';
 import { getDatabase } from '../db/client';
 
 const SECURE_STORE_KEYS = [
-  'bloom_pin_hash',
-  'bloom_pin_salt',
-  'bloom_backup_salt_v2',
+  'lunula_pin_hash',
+  'lunula_pin_salt',
+  'lunula_backup_salt_v1',
 ];
 
 /**

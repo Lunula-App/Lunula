@@ -111,6 +111,12 @@ export default function ExercisePlayerScreen() {
     runRep(1, 1);
   }
 
+  function handleSkipRest() {
+    if (animPhase !== 'rest') return;
+    clearTimer();
+    runRep(1, currentSet + 1);
+  }
+
   function handleStop() {
     clearTimer();
     setAnimPhase('idle');
@@ -257,6 +263,16 @@ export default function ExercisePlayerScreen() {
             totalReps={exercise.reps}
           />
 
+          {animPhase === 'rest' && (
+            <Button
+              mode="contained-tonal"
+              onPress={handleSkipRest}
+              style={styles.skipBtn}
+            >
+              Skip Rest
+            </Button>
+          )}
+
           <Button
             mode="outlined"
             onPress={handleStop}
@@ -322,6 +338,7 @@ const styles = StyleSheet.create({
   startBtnContent: { paddingVertical: 8 },
   runningContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 40 },
   setLabel: { fontWeight: '700', letterSpacing: 1 },
+  skipBtn: { borderRadius: 28, minWidth: 140 },
   stopBtn: { borderRadius: 28, minWidth: 140 },
   completeContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 32 },
   completeEmoji: { fontSize: 72 },

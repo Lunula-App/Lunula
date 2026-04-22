@@ -1,5 +1,5 @@
 /**
- * Notification service for Bloom.
+ * Notification service for Lunula.
  *
  * Manages three notification channels:
  *   - Daily logging reminder  (fixed time each day)
@@ -17,10 +17,10 @@ import { UserSettings } from '../models/cycle';
 import { computePrediction } from './cycleEngine';
 
 // Notification IDs used as identifiers so we can cancel/replace them
-const ID_DAILY_LOG = 'bloom_daily_log';
-const ID_PERIOD_REMINDER = 'bloom_period_reminder';
-const ID_KEGEL = 'bloom_kegel';
-const ID_BACKUP_PREFIX = 'bloom_backup_';
+const ID_DAILY_LOG = 'lunula_daily_log';
+const ID_PERIOD_REMINDER = 'lunula_period_reminder';
+const ID_KEGEL = 'lunula_kegel';
+const ID_BACKUP_PREFIX = 'lunula_backup_';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -43,8 +43,8 @@ export async function requestNotificationPermission(): Promise<boolean> {
 
   // Android 8+ needs a channel
   if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('bloom_default', {
-      name: 'Bloom Reminders',
+    await Notifications.setNotificationChannelAsync('lunula_default', {
+      name: 'Lunula Reminders',
       importance: Notifications.AndroidImportance.DEFAULT,
     });
   }
@@ -76,7 +76,7 @@ async function scheduleDailyLog(time: string) {
     identifier: ID_DAILY_LOG,
     content: {
       title: "Time to check in 🌸",
-      body: "Log how you're feeling today in Bloom.",
+      body: "Log how you're feeling today in Lunula.",
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
@@ -137,8 +137,8 @@ async function scheduleBackupReminders(intervalWeeks: 1 | 2 | 4) {
     await Notifications.scheduleNotificationAsync({
       identifier: `${ID_BACKUP_PREFIX}${i}`,
       content: {
-        title: 'Bloom backup reminder',
-        body: 'Back up your Bloom data to keep it safe. It only takes a moment.',
+        title: 'Lunula backup reminder',
+        body: 'Back up your Lunula data to keep it safe. It only takes a moment.',
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
@@ -197,7 +197,7 @@ export async function syncNotifications(settings: UserSettings): Promise<void> {
   }
 }
 
-/** Cancels every Bloom notification (used when permissions are revoked). */
+/** Cancels every Lunula notification (used when permissions are revoked). */
 export async function cancelAllNotifications(): Promise<void> {
   await Promise.all([
     cancelNotification(ID_DAILY_LOG),

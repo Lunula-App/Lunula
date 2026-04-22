@@ -109,7 +109,7 @@ export default function LockScreen() {
             <MaterialCommunityIcons name="flower-tulip-outline" size={38} color={theme.colors.primary} />
           </View>
           <Text variant="headlineSmall" style={{ color: theme.colors.onBackground, fontWeight: '600' }}>
-            Bloom
+            Lunula
           </Text>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
             Enter your PIN to continue

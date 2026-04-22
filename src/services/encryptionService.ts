@@ -1,5 +1,5 @@
 /**
- * AES-256-GCM encryption layer for Bloom backups.
+ * AES-256-GCM encryption layer for Lunula backups.
  *
  * Keys are derived from a user passphrase using PBKDF2-SHA256 (210,000
  * iterations — OWASP 2023 recommendation). A unique 128-bit salt is
@@ -15,7 +15,7 @@ import { pbkdf2Sync } from 'react-native-quick-crypto';
 import { Buffer } from '@craftzdog/react-native-buffer';
 import * as SecureStore from 'expo-secure-store';
 
-const SALT_STORE_KEY = 'bloom_backup_salt_v2';
+const SALT_STORE_KEY = 'lunula_backup_salt_v1';
 const PBKDF2_ITERATIONS = 210_000;
 const PBKDF2_KEYLEN = 32; // 256 bits
 const PBKDF2_DIGEST = 'sha256';

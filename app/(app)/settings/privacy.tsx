@@ -8,7 +8,7 @@ const PRINCIPLES = [
   {
     icon: 'database-off-outline',
     title: 'Everything stays on your device',
-    body: 'Bloom has no backend, no accounts, and no outbound connections. Your cycle data never leaves your device unless you choose to export it.',
+    body: 'Lunula has no backend, no accounts, and no outbound connections. Your cycle data never leaves your device unless you choose to export it.',
   },
   {
     icon: 'lock-outline',
@@ -18,7 +18,7 @@ const PRINCIPLES = [
   {
     icon: 'eye-off-outline',
     title: 'No tracking, no data sharing',
-    body: 'Bloom contains no analytics SDKs, no advertising identifiers, and no crash reporters that phone home. Your data is never sold or shared with third parties, for any reason.',
+    body: 'Lunula contains no analytics SDKs, no advertising identifiers, and no crash reporters that phone home. Your data is never sold or shared with third parties, for any reason.',
   },
   {
     icon: 'cellphone-lock',
@@ -55,7 +55,7 @@ export default function PrivacyScreen() {
             Your health data is yours alone
           </Text>
           <Text variant="bodyMedium" style={{ color: theme.colors.onPrimaryContainer, lineHeight: 24, textAlign: 'center' }}>
-            Bloom is built so that data collection is architecturally impossible, not just against our policy.
+            Lunula is built so that data collection is architecturally impossible, not just against our policy.
           </Text>
         </Surface>
 

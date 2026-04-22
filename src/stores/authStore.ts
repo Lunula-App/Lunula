@@ -4,9 +4,9 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import * as Crypto from 'expo-crypto';
 
 const KEYS = {
-  PIN_HASH: 'bloom_pin_hash',
-  PIN_SALT: 'bloom_pin_salt',
-  PIN_LENGTH: 'bloom_pin_length',
+  PIN_HASH: 'lunula_pin_hash',
+  PIN_SALT: 'lunula_pin_salt',
+  PIN_LENGTH: 'lunula_pin_length',
 };
 
 const LOCK_AFTER_BG_MS = 60_000; // 1 minute
@@ -80,7 +80,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   unlockWithBiometric: async (): Promise<boolean> => {
     try {
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Unlock Bloom',
+        promptMessage: 'Unlock Lunula',
         fallbackLabel: 'Use PIN',
         disableDeviceFallback: false,
       });

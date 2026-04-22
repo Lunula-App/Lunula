@@ -58,8 +58,8 @@ export default function WelcomeScreen() {
     });
     if (result.canceled || !result.assets?.length) return;
     const asset = result.assets[0];
-    if (!asset.name.endsWith('.bloom')) {
-      Alert.alert('Invalid file', 'Please select a .bloom backup file created by Bloom.');
+    if (!asset.name.endsWith('.lunula')) {
+      Alert.alert('Invalid file', 'Please select a .lunula backup file created by Lunula.');
       return;
     }
     setImportFilePath(asset.uri);
@@ -129,7 +129,7 @@ export default function WelcomeScreen() {
             style={{ marginBottom: 14 }}
           />
           <Text variant="displaySmall" style={[styles.appName, { color: theme.colors.primary }]}>
-            Bloom
+            Lunula
           </Text>
           <Text variant="bodyMedium" style={[styles.tagline, { color: theme.colors.onPrimaryContainer }]}>
             Your private cycle companion.{'\n'}All data stays on your device.
