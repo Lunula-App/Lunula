@@ -15,6 +15,10 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.lunula.app",
+      "buildNumber": "1",
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": []
+      },
       "infoPlist": {
         "NSFaceIDUsageDescription": "Lunula uses Face ID to protect access to your health data."
       }
@@ -24,6 +28,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#00897B"
       },
+      "versionCode": 1,
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.lunula.app",
@@ -56,7 +61,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "9f798a62-b7ce-49c5-a1a9-73e4e8bf3478"
+        "projectId": "ec916ed4-e882-4ee2-92bf-20f0c3ce644d"
       }
     },
     "owner": "rdmillen"

@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { Text, useTheme, Surface, Button } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -58,6 +58,16 @@ export default function PrivacyScreen() {
             Lunula is built so that data collection is architecturally impossible, not just against our policy.
           </Text>
         </Surface>
+
+        {/* Full policy link */}
+        <Button
+          mode="outlined"
+          icon="open-in-new"
+          onPress={() => Linking.openURL('https://lunula.me/privacy.html')}
+          style={{ marginBottom: 4 }}
+        >
+          Full Privacy Policy
+        </Button>
 
         {/* Principles */}
         {PRINCIPLES.map((p) => (
