@@ -126,7 +126,7 @@ export function computePrediction(
     nextPeriodEarliestDate,
     nextPeriodLatestDate,
     ovulationDate: format(ovulationDate, 'yyyy-MM-dd'),
-    ovulationWindowStart: format(addDays(ovulationDate, -2), 'yyyy-MM-dd'),
+    ovulationWindowStart: format(addDays(ovulationDate, -5), 'yyyy-MM-dd'),
     ovulationWindowEnd: format(addDays(ovulationDate, 1), 'yyyy-MM-dd'),
     daysUntilNextPeriod: Math.max(0, daysUntilNextPeriod),
     daysUntilEarliest,
