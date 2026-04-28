@@ -1,4 +1,4 @@
-import { addDays, differenceInDays, parseISO, format, isAfter } from 'date-fns';
+import { addDays, differenceInDays, parseISO, format, isAfter, isSameDay } from 'date-fns';
 import { UserSettings, CyclePrediction, CyclePhase, CycleRecord } from '../models/cycle';
 
 // A cycle is considered irregular if the standard deviation of completed
@@ -50,16 +50,24 @@ function getPhaseDuration(
 }
 
 export function estimateCycleStart(settings: UserSettings): Date {
-  // Guard against empty string default (new user before first log)
-  if (!settings.lastPeriodEndDate) return new Date();
-  const lastEnd = parseISO(settings.lastPeriodEndDate);
-  if (isNaN(lastEnd.getTime())) return new Date();
-  const lastStart = addDays(lastEnd, -(settings.avgPeriodDuration - 1));
-
   const today = new Date();
-  let cycleStart = lastStart;
 
-  while (isAfter(addDays(cycleStart, settings.avgCycleLength), today) === false) {
+  // Prefer the actual logged period start date — it's always accurate.
+  // Fall back to reconstructing from lastPeriodEndDate for legacy data.
+  let anchorStart: Date | null = null;
+  if (settings.lastPeriodStartDate) {
+    const d = parseISO(settings.lastPeriodStartDate);
+    if (!isNaN(d.getTime())) anchorStart = d;
+  }
+  if (!anchorStart) {
+    if (!settings.lastPeriodEndDate) return today;
+    const lastEnd = parseISO(settings.lastPeriodEndDate);
+    if (isNaN(lastEnd.getTime())) return today;
+    anchorStart = addDays(lastEnd, -(settings.avgPeriodDuration - 1));
+  }
+
+  let cycleStart = anchorStart;
+  while (!isAfter(addDays(cycleStart, settings.avgCycleLength), today)) {
     cycleStart = addDays(cycleStart, settings.avgCycleLength);
   }
 
@@ -74,9 +82,17 @@ export function computePrediction(
   const ovulationDay = getOvulationDay(settings.avgCycleLength);
   const currentDay = differenceInDays(today, cycleStart) + 1;
 
+  // If the user logged a period day today (lastPeriodEndDate === today),
+  // treat the menstrual phase as still active regardless of avgPeriodDuration.
+  const todayStr = format(today, 'yyyy-MM-dd');
+  const isPeriodActiveToday = settings.lastPeriodEndDate === todayStr;
+  const effectivePeriodDuration = (isPeriodActiveToday && currentDay > settings.avgPeriodDuration)
+    ? currentDay
+    : settings.avgPeriodDuration;
+
   const phase = getPhaseForDay(
     currentDay,
-    settings.avgPeriodDuration,
+    effectivePeriodDuration,
     ovulationDay,
     settings.avgCycleLength
   );
@@ -84,7 +100,7 @@ export function computePrediction(
   const nextPeriodDate = addDays(cycleStart, settings.avgCycleLength);
   const ovulationDate = addDays(cycleStart, ovulationDay - 1);
   const daysUntilNextPeriod = differenceInDays(nextPeriodDate, today);
-  const phaseStartDay = getPhaseStartDay(phase, settings.avgPeriodDuration, ovulationDay);
+  const phaseStartDay = getPhaseStartDay(phase, effectivePeriodDuration, ovulationDay);
 
   // Irregular cycle range — use stored min/max if available
   let nextPeriodEarliestDate: string | null = null;
@@ -119,7 +135,7 @@ export function computePrediction(
     phaseDay: Math.max(1, currentDay - phaseStartDay + 1),
     phaseTotalDays: getPhaseDuration(
       phase,
-      settings.avgPeriodDuration,
+      effectivePeriodDuration,
       ovulationDay,
       settings.avgCycleLength
     ),
