@@ -20,7 +20,9 @@ export interface ExerciseDefinition {
   description: string;
   phase: ExercisePhase;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
+  progressionLevel: 1 | 2 | 3;
   holdDurationMs: number;
+  holdDurations?: number[];   // per-rep hold durations; overrides holdDurationMs when present
   relaxDurationMs: number;
   setRestDurationMs: number;  // rest between sets (longer than rep relax)
   reps: number;

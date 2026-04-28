@@ -133,3 +133,11 @@ export async function getAllLogs(): Promise<DailyLog[]> {
   );
   return rows.map(rowToLog);
 }
+
+export async function getEarliestLogDate(): Promise<string | null> {
+  const db = getDatabase();
+  const row = await db.getFirstAsync<{ date: string }>(
+    'SELECT date FROM daily_logs ORDER BY date ASC LIMIT 1'
+  );
+  return row?.date ?? null;
+}

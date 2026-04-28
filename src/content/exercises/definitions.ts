@@ -11,6 +11,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     description:
       'New to pelvic floor exercises? Start here. A kegel is a gentle squeeze of the muscles you would use to stop the flow of urine mid-stream. You should feel a lift and inward squeeze — not a tightening of your stomach, thighs, or buttocks.',
     difficulty: 'beginner',
+    progressionLevel: 1,
     holdDurationMs: 3000,
     relaxDurationMs: 6000,
     setRestDurationMs: 30000,
@@ -31,7 +32,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     ],
   },
 
-  // ── MENSTRUAL PHASE ────────────────────────────────────────────────
+  // ── MENSTRUAL — LEVEL 1 ───────────────────────────────────────────
   {
     id: 'men-01',
     slug: 'diaphragmatic-breathing',
@@ -41,6 +42,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     description:
       'Coordinates the diaphragm and pelvic floor to relieve cramping and activate the parasympathetic nervous system.',
     difficulty: 'beginner',
+    progressionLevel: 1,
     holdDurationMs: 4000,
     relaxDurationMs: 6000,
     setRestDurationMs: 30000,
@@ -64,6 +66,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     description:
       'Intentional lengthening of the pelvic floor to ease tension and reduce pain during menstruation.',
     difficulty: 'beginner',
+    progressionLevel: 1,
     holdDurationMs: 5000,
     relaxDurationMs: 5000,
     setRestDurationMs: 30000,
@@ -79,7 +82,86 @@ export const EXERCISES: ExerciseDefinition[] = [
     contraindications: ['Reduce sets if bleeding is very heavy'],
   },
 
-  // ── FOLLICULAR PHASE ───────────────────────────────────────────────
+  // ── MENSTRUAL — LEVEL 2 ───────────────────────────────────────────
+  {
+    id: 'men-03',
+    slug: 'progressive-release-sequence',
+    type: 'reverse_kegel',
+    phase: 'menstrual',
+    name: 'Progressive Release Sequence',
+    description:
+      'A graduated reverse kegel sequence — holds lengthen across reps so you progressively open and release the pelvic floor. Ideal for managing heavier cramping days.',
+    difficulty: 'intermediate',
+    progressionLevel: 2,
+    holdDurationMs: 4000,
+    holdDurations: [3000, 3000, 5000, 5000, 7000, 7000, 5000, 3000],
+    relaxDurationMs: 6000,
+    setRestDurationMs: 30000,
+    reps: 8,
+    sets: 2,
+    breathingCue: 'Bear down gently — breathe into the opening',
+    relaxCue: 'Return slowly — feel the pelvic floor soften',
+    benefits: [
+      'Progressive lengthening reduces cramp intensity over time',
+      'Trains the nervous system to release on demand',
+      'Builds body awareness during menstruation',
+    ],
+    contraindications: ['Reduce sets if bleeding is very heavy'],
+  },
+  {
+    id: 'men-04',
+    slug: 'breath-wave',
+    type: 'diaphragmatic_breath',
+    phase: 'menstrual',
+    name: 'Breath Wave',
+    description:
+      'Extended diaphragmatic breathing with deliberate pelvic floor coordination. The exhale phase lengthens across the set to deepen the parasympathetic response.',
+    difficulty: 'intermediate',
+    progressionLevel: 2,
+    holdDurationMs: 5000,
+    holdDurations: [4000, 5000, 6000, 7000, 6000, 5000, 4000, 4000],
+    relaxDurationMs: 7000,
+    setRestDurationMs: 30000,
+    reps: 8,
+    sets: 2,
+    breathingCue: 'Inhale — belly then chest — feel pelvic floor drop',
+    relaxCue: 'Long slow exhale — pelvic floor gently lifts',
+    benefits: [
+      'Deepens diaphragm–pelvic floor coordination',
+      'Reduces anxiety and cramping together',
+      'Improves breath capacity',
+    ],
+    contraindications: [],
+  },
+
+  // ── MENSTRUAL — LEVEL 3 ───────────────────────────────────────────
+  {
+    id: 'men-05',
+    slug: 'release-pyramid',
+    type: 'reverse_kegel',
+    phase: 'menstrual',
+    name: 'Release Pyramid',
+    description:
+      'A full pyramid reverse kegel sequence — hold durations build to a peak then descend. Trains maximum pelvic floor lengthening capacity.',
+    difficulty: 'advanced',
+    progressionLevel: 3,
+    holdDurationMs: 6000,
+    holdDurations: [3000, 5000, 7000, 10000, 10000, 7000, 5000, 3000],
+    relaxDurationMs: 8000,
+    setRestDurationMs: 45000,
+    reps: 8,
+    sets: 3,
+    breathingCue: 'Full open breath — let the floor descend completely',
+    relaxCue: 'Rise slowly — feel each layer return',
+    benefits: [
+      'Maximum pelvic floor lengthening',
+      'Trains full range of motion under fatigue',
+      'Powerful cramp and tension relief',
+    ],
+    contraindications: ['Skip on very heavy flow days — use men-02 instead'],
+  },
+
+  // ── FOLLICULAR — LEVEL 1 ──────────────────────────────────────────
   {
     id: 'fol-01',
     slug: 'kegel-building-set',
@@ -89,6 +171,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     description:
       'Classic pelvic floor contraction. Rising estrogen supports tissue recovery — ideal for building baseline strength.',
     difficulty: 'beginner',
+    progressionLevel: 1,
     holdDurationMs: 5000,
     relaxDurationMs: 5000,
     setRestDurationMs: 30000,
@@ -114,6 +197,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     description:
       'Extended hold to build slow-twitch endurance fibers. Equal rest time ensures full recovery between reps.',
     difficulty: 'intermediate',
+    progressionLevel: 1,
     holdDurationMs: 10000,
     relaxDurationMs: 10000,
     setRestDurationMs: 45000,
@@ -127,7 +211,6 @@ export const EXERCISES: ExerciseDefinition[] = [
     ],
     contraindications: ['Stop if you feel a bearing-down sensation'],
   },
-
   {
     id: 'fol-01b',
     slug: 'short-hold-kegel',
@@ -137,6 +220,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     description:
       'A gentler introduction to kegel training — shorter holds with generous rest to let you focus on finding and releasing the right muscles.',
     difficulty: 'beginner',
+    progressionLevel: 1,
     holdDurationMs: 3000,
     relaxDurationMs: 6000,
     setRestDurationMs: 30000,
@@ -154,7 +238,88 @@ export const EXERCISES: ExerciseDefinition[] = [
     ],
   },
 
-  // ── OVULATORY PHASE ────────────────────────────────────────────────
+  // ── FOLLICULAR — LEVEL 2 ──────────────────────────────────────────
+  {
+    id: 'fol-03',
+    slug: 'build-and-hold',
+    type: 'kegel_hold',
+    phase: 'follicular',
+    name: 'Build & Hold',
+    description:
+      'Alternates short and long holds to train both fast-twitch and slow-twitch fibers in the same set. The variation keeps engagement high and prevents accommodation.',
+    difficulty: 'intermediate',
+    progressionLevel: 2,
+    holdDurationMs: 7000,
+    holdDurations: [3000, 10000, 3000, 10000, 3000, 10000, 3000, 10000],
+    relaxDurationMs: 6000,
+    setRestDurationMs: 30000,
+    reps: 8,
+    sets: 3,
+    breathingCue: 'Squeeze firmly — short or long, give it everything',
+    relaxCue: 'Full release before the next rep',
+    benefits: [
+      'Simultaneously trains fast- and slow-twitch fibers',
+      'Prevents neuromuscular accommodation',
+      'Builds comprehensive pelvic floor strength',
+    ],
+    contraindications: [
+      'Do not perform while urinating',
+    ],
+  },
+  {
+    id: 'fol-04',
+    slug: 'ladder-kegel',
+    type: 'kegel_hold',
+    phase: 'follicular',
+    name: 'Ladder Kegel',
+    description:
+      'Hold durations climb one step at a time — 3s, 5s, 7s, 9s — then descend. Progressive loading builds endurance without sudden fatigue.',
+    difficulty: 'intermediate',
+    progressionLevel: 2,
+    holdDurationMs: 6000,
+    holdDurations: [3000, 5000, 7000, 9000, 9000, 7000, 5000, 3000],
+    relaxDurationMs: 6000,
+    setRestDurationMs: 35000,
+    reps: 8,
+    sets: 3,
+    breathingCue: 'Lift and hold — breathe through it',
+    relaxCue: 'Complete release — reset for next hold',
+    benefits: [
+      'Progressive overload in a single session',
+      'Endurance and strength combined',
+      'Mirrors physiotherapy ladder protocols',
+    ],
+    contraindications: ['Stop if bearing-down sensation occurs'],
+  },
+
+  // ── FOLLICULAR — LEVEL 3 ──────────────────────────────────────────
+  {
+    id: 'fol-05',
+    slug: 'endurance-pyramid',
+    type: 'kegel_hold',
+    phase: 'follicular',
+    name: 'Endurance Pyramid',
+    description:
+      'A full strength pyramid — holds build to 12 seconds at peak then descend. Trains maximum slow-twitch endurance and teaches the nervous system to sustain contraction under fatigue.',
+    difficulty: 'advanced',
+    progressionLevel: 3,
+    holdDurationMs: 7000,
+    holdDurations: [4000, 6000, 8000, 10000, 12000, 10000, 8000, 6000, 4000],
+    relaxDurationMs: 8000,
+    setRestDurationMs: 45000,
+    reps: 9,
+    sets: 3,
+    breathingCue: 'Full lift — breathe normally through the hold',
+    relaxCue: 'Complete release — every second counts',
+    benefits: [
+      'Maximum slow-twitch endurance',
+      'Advanced stress incontinence prevention',
+      'Trains contraction quality under fatigue',
+    ],
+    contraindications: ['Stop if you feel a bearing-down sensation'],
+  },
+
+  // ── OVULATORY — LEVEL 1 ───────────────────────────────────────────
   {
     id: 'ovu-01',
     slug: 'quick-flick-pulses',
@@ -164,6 +329,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     description:
       'Fast-twitch training for coordination and reflexive continence. Peak tissue elasticity at ovulation makes this the ideal time.',
     difficulty: 'intermediate',
+    progressionLevel: 1,
     holdDurationMs: 1000,
     relaxDurationMs: 1000,
     setRestDurationMs: 30000,
@@ -187,6 +353,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     description:
       'Combines glute activation with pelvic floor contraction for functional, whole-body strength.',
     difficulty: 'intermediate',
+    progressionLevel: 1,
     holdDurationMs: 6000,
     relaxDurationMs: 4000,
     setRestDurationMs: 30000,
@@ -201,7 +368,6 @@ export const EXERCISES: ExerciseDefinition[] = [
     ],
     contraindications: ['Avoid with sacroiliac joint pain'],
   },
-
   {
     id: 'ovu-01b',
     slug: 'slow-pulse-kegel',
@@ -211,6 +377,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     description:
       'A beginner-friendly version of the quick-flick — slower rhythm so you can focus on a clean squeeze and full release each time.',
     difficulty: 'beginner',
+    progressionLevel: 1,
     holdDurationMs: 2000,
     relaxDurationMs: 3000,
     setRestDurationMs: 30000,
@@ -235,6 +402,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     description:
       'A supported alternative to the Kegel Bridge. Sitting upright with feet flat, squeeze the pelvic floor and hold — no balance or hip mobility required.',
     difficulty: 'beginner',
+    progressionLevel: 1,
     holdDurationMs: 4000,
     relaxDurationMs: 5000,
     setRestDurationMs: 30000,
@@ -252,7 +420,86 @@ export const EXERCISES: ExerciseDefinition[] = [
     ],
   },
 
-  // ── LUTEAL PHASE ───────────────────────────────────────────────────
+  // ── OVULATORY — LEVEL 2 ───────────────────────────────────────────
+  {
+    id: 'ovu-03',
+    slug: 'interval-training',
+    type: 'kegel_pulse',
+    phase: 'ovulatory',
+    name: 'Interval Training',
+    description:
+      'Alternates rapid-fire pulses with sustained holds — combining fast-twitch coordination and slow-twitch endurance in a single session. The contrast between speeds maximises fiber recruitment.',
+    difficulty: 'intermediate',
+    progressionLevel: 2,
+    holdDurationMs: 3000,
+    holdDurations: [1000, 1000, 1000, 6000, 1000, 1000, 1000, 6000, 1000, 1000],
+    relaxDurationMs: 2000,
+    setRestDurationMs: 30000,
+    reps: 10,
+    sets: 3,
+    breathingCue: 'Pulses: snap and release. Holds: full squeeze, breathe through',
+    relaxCue: 'Let go fully — prepare for next interval',
+    benefits: [
+      'Trains both fiber types simultaneously',
+      'Improves coordination under fatigue',
+      'Mirrors real-world demands (cough, laugh, lift)',
+    ],
+    contraindications: [],
+  },
+  {
+    id: 'ovu-04',
+    slug: 'power-bridge',
+    type: 'hip_bridge',
+    phase: 'ovulatory',
+    name: 'Power Bridge Sequence',
+    description:
+      'Progressive bridge holds — each rep the hold at the top gets longer. Builds glute–pelvic coordination under increasing time under tension.',
+    difficulty: 'intermediate',
+    progressionLevel: 2,
+    holdDurationMs: 5000,
+    holdDurations: [3000, 4000, 5000, 6000, 7000, 8000, 7000, 6000, 5000, 4000],
+    relaxDurationMs: 4000,
+    setRestDurationMs: 35000,
+    reps: 10,
+    sets: 3,
+    breathingCue: 'Drive hips up — squeeze at the top',
+    relaxCue: 'Controlled descent — release as hips lower',
+    benefits: [
+      'Progressive glute–pelvic loading',
+      'Functional strength for daily movement',
+      'Builds hip stability alongside pelvic floor',
+    ],
+    contraindications: ['Avoid with sacroiliac joint pain'],
+  },
+
+  // ── OVULATORY — LEVEL 3 ───────────────────────────────────────────
+  {
+    id: 'ovu-05',
+    slug: 'power-circuit',
+    type: 'kegel_pulse',
+    phase: 'ovulatory',
+    name: 'Power Circuit',
+    description:
+      'Maximum intensity ovulatory session — rapid pulses give way to a peak sustained hold, then descend back to pulses. Pushes both fiber types to their limit.',
+    difficulty: 'advanced',
+    progressionLevel: 3,
+    holdDurationMs: 4000,
+    holdDurations: [1000, 1000, 1000, 1000, 1000, 8000, 10000, 8000, 1000, 1000, 1000, 1000],
+    relaxDurationMs: 2000,
+    setRestDurationMs: 40000,
+    reps: 12,
+    sets: 3,
+    breathingCue: 'Pulses: explosive. Holds: full contraction — breathe through',
+    relaxCue: 'Complete release between every rep',
+    benefits: [
+      'Peak fast- and slow-twitch recruitment',
+      'Advanced coordination and endurance',
+      'Maximum reflex continence training',
+    ],
+    contraindications: [],
+  },
+
+  // ── LUTEAL — LEVEL 1 ──────────────────────────────────────────────
   {
     id: 'lut-01',
     slug: 'supported-deep-squat',
@@ -262,6 +509,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     description:
       'Progesterone loosens ligaments in the luteal phase — a supported squat safely opens the pelvic floor for mobility work.',
     difficulty: 'beginner',
+    progressionLevel: 1,
     holdDurationMs: 8000,
     relaxDurationMs: 4000,
     setRestDurationMs: 30000,
@@ -285,6 +533,7 @@ export const EXERCISES: ExerciseDefinition[] = [
     description:
       'Balances the luteal tendency to hold tension with intentional pelvic floor release. Relax phase is longer than the hold.',
     difficulty: 'beginner',
+    progressionLevel: 1,
     holdDurationMs: 6000,
     relaxDurationMs: 8000,
     setRestDurationMs: 30000,
@@ -295,6 +544,85 @@ export const EXERCISES: ExerciseDefinition[] = [
     benefits: [
       'Reduces PMS-related pelvic tension',
       'Maintains pelvic mobility before menstruation',
+    ],
+    contraindications: [],
+  },
+
+  // ── LUTEAL — LEVEL 2 ──────────────────────────────────────────────
+  {
+    id: 'lut-03',
+    slug: 'tension-release-wave',
+    type: 'reverse_kegel',
+    phase: 'luteal',
+    name: 'Tension Release Wave',
+    description:
+      'Graduated holds that build then ease off — mimicking a wave pattern to progressively release pelvic tension. The descending second half helps the nervous system fully unwind.',
+    difficulty: 'intermediate',
+    progressionLevel: 2,
+    holdDurationMs: 6000,
+    holdDurations: [4000, 6000, 8000, 8000, 6000, 4000, 4000, 4000],
+    relaxDurationMs: 8000,
+    setRestDurationMs: 35000,
+    reps: 8,
+    sets: 2,
+    breathingCue: 'Open and lengthen — breathe into the release',
+    relaxCue: 'Let the floor settle — stay soft',
+    benefits: [
+      'Progressive pelvic tension release',
+      'Reduces PMS symptoms over training cycles',
+      'Nervous system downregulation',
+    ],
+    contraindications: [],
+  },
+  {
+    id: 'lut-04',
+    slug: 'stability-and-release',
+    type: 'kegel_basic',
+    phase: 'luteal',
+    name: 'Stability & Release',
+    description:
+      'Alternates moderate holds with longer releases — building just enough tone to support loose luteal-phase ligaments, without adding tension.',
+    difficulty: 'intermediate',
+    progressionLevel: 2,
+    holdDurationMs: 5000,
+    holdDurations: [5000, 5000, 5000, 5000, 5000, 5000],
+    relaxDurationMs: 10000,
+    setRestDurationMs: 30000,
+    reps: 6,
+    sets: 3,
+    breathingCue: 'Firm squeeze — just enough to feel stable',
+    relaxCue: 'Long release — twice the hold time',
+    benefits: [
+      'Supports joint stability during ligament laxity',
+      'Prevents over-tightening',
+      'Balances tone with mobility',
+    ],
+    contraindications: [],
+  },
+
+  // ── LUTEAL — LEVEL 3 ──────────────────────────────────────────────
+  {
+    id: 'lut-05',
+    slug: 'full-release-protocol',
+    type: 'reverse_kegel',
+    phase: 'luteal',
+    name: 'Full Release Protocol',
+    description:
+      'Advanced pelvic floor lengthening — pyramid holds push to maximum release at the peak, then ease down. Combined with extended rest, this is the most complete tension relief in the programme.',
+    difficulty: 'advanced',
+    progressionLevel: 3,
+    holdDurationMs: 7000,
+    holdDurations: [4000, 6000, 8000, 10000, 12000, 10000, 8000, 6000],
+    relaxDurationMs: 10000,
+    setRestDurationMs: 45000,
+    reps: 8,
+    sets: 3,
+    breathingCue: 'Full open breath — pelvic floor descends completely',
+    relaxCue: 'Extremely long release — let everything go',
+    benefits: [
+      'Maximum pelvic floor lengthening',
+      'Complete PMS tension relief',
+      'Prepares body optimally for menstruation',
     ],
     contraindications: [],
   },

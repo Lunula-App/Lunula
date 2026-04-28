@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
-import { Text, useTheme, Surface, Chip, SegmentedButtons } from 'react-native-paper';
+import { Text, useTheme, Surface, Chip } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -13,6 +13,7 @@ import { useExerciseStore } from '../../../src/stores/exerciseStore';
 import { ExerciseDefinition } from '../../../src/models/exercise';
 import { PHASE_COLORS } from '../../../src/theme/colors';
 import { CyclePhase } from '../../../src/models/cycle';
+import { getUserProgressionLevel, progressionLevelLabel, ProgressionLevel } from '../../../src/services/progressionService';
 
 const DIFFICULTY_COLORS = {
   beginner: '#4CAF50',
@@ -26,7 +27,7 @@ export default function ExercisesScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { settings } = useSettingsStore();
-  const [level, setLevel] = useState<'beginner' | 'all'>('all');
+  const [userLevel, setUserLevel] = useState<ProgressionLevel>(1);
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const { streak, last7, sessionDates, load: loadStreak } = useExerciseStore();
 
@@ -36,6 +37,7 @@ export default function ExercisesScreen() {
         setCompletedIds(new Set(sessions.map((s) => s.exerciseId)));
       });
       loadStreak();
+      getUserProgressionLevel().then(setUserLevel);
     }, [])
   );
 
@@ -44,9 +46,9 @@ export default function ExercisesScreen() {
     const prediction = computePrediction(settings);
     const p = prediction.currentPhase;
     const all = getExercisesForPhase(p).filter((e) => e.type !== 'tutorial');
-    const filtered = level === 'beginner' ? all.filter((e) => e.difficulty === 'beginner') : all;
+    const filtered = all.filter((e) => e.progressionLevel <= userLevel);
     return { phase: p, exercises: filtered };
-  }, [settings, level]);
+  }, [settings, userLevel]);
 
   const phaseColor = PHASE_COLORS[phase as CyclePhase];
 
@@ -122,19 +124,26 @@ export default function ExercisesScreen() {
           </>
         )}
 
-        {/* Level filter */}
-        <Text variant="titleSmall" style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant }]}>
-          TODAY'S EXERCISES
-        </Text>
-        <SegmentedButtons
-          value={level}
-          onValueChange={(v) => setLevel(v as 'beginner' | 'all')}
-          buttons={[
-            { value: 'beginner', label: 'Beginner' },
-            { value: 'all', label: 'All levels' },
-          ]}
-          style={styles.segmented}
-        />
+        {/* Progression level + exercises header */}
+        <View style={styles.sectionRow}>
+          <Text variant="titleSmall" style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant }]}>
+            TODAY'S EXERCISES
+          </Text>
+          <Chip
+            compact
+            icon={() => (
+              <MaterialCommunityIcons
+                name={userLevel === 3 ? 'star' : userLevel === 2 ? 'star-half-full' : 'star-outline'}
+                size={14}
+                color={phaseColor}
+              />
+            )}
+            style={{ backgroundColor: phaseColor + '22' }}
+            textStyle={{ color: phaseColor, fontSize: 11 }}
+          >
+            {progressionLevelLabel(userLevel)}
+          </Chip>
+        </View>
 
         {exercises.map((ex) => (
           <ExerciseCard
@@ -162,7 +171,9 @@ function ExerciseCard({
   completed: boolean;
 }) {
   const theme = useTheme();
-  const holdSec = Math.round(exercise.holdDurationMs / 1000);
+  const holdLabel = exercise.holdDurations
+    ? `${Math.round(Math.min(...exercise.holdDurations) / 1000)}–${Math.round(Math.max(...exercise.holdDurations) / 1000)}s`
+    : `${Math.round(exercise.holdDurationMs / 1000)}s`;
   const relaxSec = Math.round(exercise.relaxDurationMs / 1000);
   const DONE_COLOR = '#4CAF50';
 
@@ -222,7 +233,7 @@ function ExerciseCard({
           <View style={styles.statsRow}>
             <StatBadge label="Sets" value={String(exercise.sets)} color={phaseColor} />
             <StatBadge label="Reps" value={String(exercise.reps)} color={phaseColor} />
-            <StatBadge label="Hold" value={`${holdSec}s`} color={phaseColor} />
+            <StatBadge label="Hold" value={holdLabel} color={phaseColor} />
             <StatBadge label="Rest" value={`${relaxSec}s`} color={phaseColor} />
           </View>
         </Surface>
@@ -268,8 +279,8 @@ const styles = StyleSheet.create({
   dotsRow: { flexDirection: 'row', justifyContent: 'space-between' },
   dotCol: { alignItems: 'center', gap: 4, flex: 1 },
   streakDot: { width: 28, height: 28, borderRadius: 14 },
-  sectionLabel: { fontWeight: '700', letterSpacing: 0.8, paddingHorizontal: 4 },
-  segmented: { marginBottom: 4 },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4 },
+  sectionLabel: { fontWeight: '700', letterSpacing: 0.8 },
   card: { borderRadius: 16, padding: 16, gap: 10, borderWidth: 1.5 },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   chipsRow: { flexDirection: 'row', gap: 6, marginTop: 4, flexWrap: 'wrap' },

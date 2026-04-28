@@ -48,7 +48,8 @@ export default function ExercisePlayerScreen() {
       if (!exercise) return;
       clearTimer(); // ensure no stale timer is running before starting a new one
 
-      const holdSec = Math.round(exercise.holdDurationMs / 1000);
+      const repHoldMs = exercise.holdDurations?.[rep - 1] ?? exercise.holdDurationMs;
+      const holdSec = Math.round(repHoldMs / 1000);
       const relaxSec = Math.round(exercise.relaxDurationMs / 1000);
 
       setAnimPhase('hold');
@@ -255,7 +256,7 @@ export default function ExercisePlayerScreen() {
           <PulsingCircle
             phase={animPhase}
             cyclePhase={currentPhase}
-            holdDurationMs={exercise.holdDurationMs}
+            holdDurationMs={exercise.holdDurations?.[currentRep - 1] ?? exercise.holdDurationMs}
             relaxDurationMs={exercise.relaxDurationMs}
             cue={cue}
             countdown={countdown}
