@@ -18,6 +18,7 @@ export default function SecurityScreen() {
   const [saving, setSaving] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [enableBiometricOnSetup, setEnableBiometricOnSetup] = useState(false);
 
   async function handleSetPin() {
     if (pin.length < 4) { setPinError('PIN must be at least 4 digits'); return; }
@@ -25,6 +26,9 @@ export default function SecurityScreen() {
     setPinError('');
     setSaving(true);
     await setupPin(pin);
+    if (!hasPinSetup && enableBiometricOnSetup) {
+      await updateSettings({ biometricEnabled: true });
+    }
     setSaving(false);
     setPin('');
     setPinConfirm('');
@@ -121,6 +125,21 @@ export default function SecurityScreen() {
               error={!!pinError}
             />
             {!!pinError && <HelperText type="error">{pinError}</HelperText>}
+            {!hasPinSetup && biometricAvailable && (
+              <List.Item
+                title="Also enable biometric unlock"
+                description="Use Face ID or fingerprint instead of PIN"
+                left={(props) => <List.Icon {...props} icon="fingerprint" />}
+                right={() => (
+                  <Switch
+                    value={enableBiometricOnSetup}
+                    onValueChange={setEnableBiometricOnSetup}
+                  />
+                )}
+                style={styles.biometricRow}
+                onPress={() => setEnableBiometricOnSetup((v) => !v)}
+              />
+            )}
             <Button
               mode="contained"
               onPress={handleSetPin}
@@ -144,4 +163,5 @@ const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: 16, paddingTop: 8 },
   buttonRow: { flexDirection: 'row', gap: 12, paddingHorizontal: 16, marginTop: 8 },
   pinForm: { gap: 12, paddingHorizontal: 4, marginTop: 8 },
+  biometricRow: { paddingHorizontal: 0, marginHorizontal: -8 },
 });
