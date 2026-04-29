@@ -309,7 +309,7 @@ export default function SettingsScreen() {
           </Text>
           <Button
             mode="contained"
-            onPress={() => WebBrowser.openBrowserAsync('https://ko-fi.com/bloomapp')}
+            onPress={() => WebBrowser.openBrowserAsync('https://ko-fi.com/lunula_app')}
             buttonColor={theme.colors.primary}
             textColor={theme.colors.onPrimary}
             icon="heart-outline"
