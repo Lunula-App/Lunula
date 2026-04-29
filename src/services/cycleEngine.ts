@@ -49,9 +49,7 @@ function getPhaseDuration(
   }
 }
 
-export function estimateCycleStart(settings: UserSettings): Date {
-  const today = new Date();
-
+export function estimateCycleStart(settings: UserSettings, today: Date = new Date()): Date {
   // Prefer the actual logged period start date — it's always accurate.
   // Fall back to reconstructing from lastPeriodEndDate for legacy data.
   let anchorStart: Date | null = null;
@@ -70,6 +68,9 @@ export function estimateCycleStart(settings: UserSettings): Date {
   while (!isAfter(addDays(cycleStart, settings.avgCycleLength), today)) {
     cycleStart = addDays(cycleStart, settings.avgCycleLength);
   }
+  while (isAfter(cycleStart, today)) {
+    cycleStart = addDays(cycleStart, -settings.avgCycleLength);
+  }
 
   return cycleStart;
 }
@@ -78,7 +79,7 @@ export function computePrediction(
   settings: UserSettings,
   today: Date = new Date()
 ): CyclePrediction {
-  const cycleStart = estimateCycleStart(settings);
+  const cycleStart = estimateCycleStart(settings, today);
   const ovulationDay = getOvulationDay(settings.avgCycleLength);
   const currentDay = differenceInDays(today, cycleStart) + 1;
 
