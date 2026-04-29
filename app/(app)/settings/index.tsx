@@ -6,6 +6,7 @@ import {
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import Constants from 'expo-constants';
 import * as DocumentPicker from 'expo-document-picker';
 import * as WebBrowser from 'expo-web-browser';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -325,7 +326,7 @@ export default function SettingsScreen() {
           <Divider />
           <List.Item
             title="App Version"
-            description="Lunula 1.0.0 (MVP)"
+            description={`Lunula ${Constants.expoConfig?.version ?? '—'}`}
             left={(props) => <List.Icon {...props} icon="information" />}
           />
           <Divider />
