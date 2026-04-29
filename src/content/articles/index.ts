@@ -87,6 +87,42 @@ export const ARTICLES: Article[] = [
     ],
   },
 
+  // ── FOLLICULAR PHASE (discharge overview) ────────────────────────────
+  {
+    slug: 'cervical-discharge-across-the-cycle',
+    phase: 'follicular',
+    title: 'Reading Your Discharge Across the Cycle',
+    summary: 'Cervical discharge changes in a predictable pattern driven by oestrogen and progesterone. Learning to read it gives you a real-time window into your cycle.',
+    readTimeMinutes: 5,
+    tags: ['discharge', 'cervical mucus', 'fertility awareness', 'follicular', 'cycle signs'],
+    sources: [
+      { label: 'Billings & Billings – Billings Ovulation Method', url: 'https://www.woomb.org' },
+      { label: 'FSRH – Fertility Awareness Methods', url: 'https://www.fsrh.org/standards-and-guidance/documents/ceu-clinical-guidance-fertility-awareness-methods/' },
+      { label: 'NHS – Natural family planning (fertility awareness)', url: 'https://www.nhs.uk/conditions/contraception/natural-family-planning/' },
+      { label: 'Frank-Herrmann et al. – Hum Reprod, 2007', url: 'https://academic.oup.com/humrep/article/22/5/1310/2914315' },
+    ],
+    content: [
+      { type: 'paragraph', text: 'Cervical discharge — sometimes called cervical mucus — is produced by specialised cells in the cervix. Its texture, colour, and quantity shift dramatically across your cycle in response to oestrogen and progesterone. These changes are not random: they follow a reliable pattern that reflects where you are in your cycle.' },
+      { type: 'heading', text: 'Why discharge changes' },
+      { type: 'paragraph', text: 'Oestrogen, which rises through the follicular phase, stimulates the cervix to produce increasing amounts of progressively more fluid, stretchy mucus. This creates a hospitable environment for sperm and signals the approach of ovulation. After ovulation, progesterone shifts the cervix back to producing thick, tacky mucus that forms a barrier — the body\'s way of closing the fertile window.' },
+      { type: 'heading', text: 'The pattern across your cycle' },
+      { type: 'bullet_list', items: [
+        'Menstrual phase: bleeding masks any discharge — not typically observable',
+        'Early follicular (just after your period): dry or minimal. No visible discharge, or a small amount that is white and sticky — oestrogen is still low',
+        'Mid-follicular: creamy. Smooth, lotion-like, white or off-white — oestrogen is rising, fertile window is approaching',
+        'Late follicular: watery. Clear, wet, slippery — oestrogen is high, fertile window is open',
+        'Ovulatory: egg white. Clear, very stretchy (can stretch 2–5cm between fingers), raw-egg-white texture — this is the peak fertility sign',
+        'Luteal: sticky or dry. Progesterone causes a return to thick, tacky, or absent discharge — fertile window has closed',
+      ]},
+      { type: 'tip', text: 'The simplest way to observe: check the paper after wiping, or use a clean finger before urinating. Look at colour, and try gently stretching between finger and thumb — egg white mucus will hold a thread.' },
+      { type: 'heading', text: 'What "atypical" means' },
+      { type: 'paragraph', text: 'Discharge that is grey, green, or strong yellow — or that has an unusual odour, causes itching or irritation — is outside the normal hormonal pattern. This is worth noting as it may indicate a bacterial or yeast infection. It is not a cycle sign and is unrelated to where you are in your cycle. If it persists, speak to a GP or pharmacist.' },
+      { type: 'callout', text: 'Cervical mucus observation is used in evidence-based fertility awareness methods (Billings Ovulation Method, Creighton Model, Symptothermal Method). When used correctly, these methods have efficacy comparable to barrier contraception — though they require consistent daily observation and training to use for contraceptive purposes.' },
+      { type: 'heading', text: 'Logging discharge in Lunula' },
+      { type: 'paragraph', text: 'The discharge section in your daily log uses these same categories. Over time, logging daily will help you identify your personal pattern — some people have a very clear, well-defined progression; others have shorter or less distinct windows. Your pattern is yours, and tracking it makes it legible.' },
+    ],
+  },
+
   // ── OVULATORY PHASE ──────────────────────────────────────────────────
   {
     slug: 'ovulation-explained',
@@ -126,6 +162,38 @@ export const ARTICLES: Article[] = [
       { type: 'callout', text: 'One caveat: the ACL ligament is slightly more lax at ovulation due to oestrogen\'s effect on connective tissue. Ensure warm-ups include activation exercises, especially for high-impact sport.' },
       { type: 'heading', text: 'Practical recommendations' },
       { type: 'bullet_list', items: ['Schedule strength training, HIIT, or sport competitions during this window', 'Take advantage of increased motivation and confidence', 'Maintain adequate protein intake (1.6–2.0g per kg body weight) to support muscle synthesis'] },
+    ],
+  },
+  {
+    slug: 'egg-white-discharge-fertile-window',
+    phase: 'ovulatory',
+    title: 'Egg White Discharge: Your Body\'s Fertility Signal',
+    summary: 'The appearance of clear, stretchy discharge is one of the most reliable signs that ovulation is imminent. Here\'s what it is, why it happens, and what it tells you.',
+    readTimeMinutes: 4,
+    tags: ['discharge', 'egg white', 'fertile window', 'ovulatory', 'cervical mucus', 'fertility'],
+    sources: [
+      { label: 'Wilcox et al. – NEJM, 1995 (fertile window timing)', url: 'https://www.nejm.org/doi/full/10.1056/NEJM199512073332301' },
+      { label: 'ASRM – Optimizing Natural Fertility, Fertil Steril 2022', url: 'https://www.fertstert.org' },
+      { label: 'ACOG – Fertility awareness-based methods', url: 'https://www.acog.org/womens-health/faqs/fertility-awareness-based-methods-of-family-planning' },
+      { label: 'Billings & Billings – Billings Ovulation Method', url: 'https://www.woomb.org' },
+    ],
+    content: [
+      { type: 'paragraph', text: 'In the days leading up to ovulation, many people notice a change in their discharge: it becomes clear, slippery, and highly stretchy — often compared to raw egg white. This is not a coincidence or an irregularity. It is one of the body\'s most consistent and clinically recognised signs that the fertile window is open.' },
+      { type: 'heading', text: 'Why egg white discharge appears' },
+      { type: 'paragraph', text: 'As the dominant follicle matures, it releases a surge of oestrogen. This triggers the cervix to produce a specific type of mucus — called Type E (estrogenic) mucus — that is structurally different from the thick, tacky mucus produced at other points in the cycle. Type E mucus has a long, organised molecular structure that creates channels allowing sperm to travel through the cervix efficiently. It also keeps sperm viable for up to five days.' },
+      { type: 'heading', text: 'What to look for' },
+      { type: 'bullet_list', items: [
+        'Colour: clear or very slightly cloudy — not white or yellow',
+        'Texture: smooth and slippery, not sticky or pasty',
+        'Elasticity: stretches 2–5 cm between finger and thumb without breaking — this is the defining characteristic',
+        'Sensation: a wet or slippery feeling throughout the day, sometimes without needing to check',
+      ]},
+      { type: 'heading', text: 'When it appears and how long it lasts' },
+      { type: 'paragraph', text: 'Egg white discharge typically appears 1–5 days before ovulation, peaks on the day before ovulation (which is also the day of highest conception probability, per Wilcox et al., NEJM 1995), and disappears abruptly once ovulation has occurred and progesterone rises. For many people the window is 2–3 days; for others it may be 1 day or up to 5. Your personal pattern becomes clearer with several cycles of observation.' },
+      { type: 'tip', text: 'The last day you observe egg white or watery discharge is called the Peak Day in the Billings Ovulation Method. Ovulation most commonly occurs on Peak Day or the day after. Discharge typically returns to sticky or absent within 24–48 hours of ovulation.' },
+      { type: 'heading', text: 'What happens after' },
+      { type: 'paragraph', text: 'Once progesterone rises after ovulation, the cervical mucus rapidly becomes thick and tacky again — forming what is sometimes called a mucus plug. This is the body closing the fertile window. You may notice discharge becomes white, sticky, and difficult to stretch, or disappears almost entirely. This shift is one of the confirmatory signs in the symptothermal method that ovulation has occurred.' },
+      { type: 'callout', text: 'Egg white discharge is a sign that ovulation is approaching — not that it has already happened. It marks the start of the most fertile days, not the end of them. If you are trying to conceive, this is the window to act on.' },
     ],
   },
 
