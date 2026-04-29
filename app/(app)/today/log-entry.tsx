@@ -8,8 +8,9 @@ import { useLogStore } from '../../../src/stores/logStore';
 import { getLogForDate } from '../../../src/db/repositories/logRepository';
 import { todayDate } from '../../../src/db/client';
 import {
-  FlowIntensity, Symptom, Mood, Craving,
-  SYMPTOM_LABELS, MOOD_LABELS, MOOD_EMOJIS, CRAVING_LABELS, FLOW_LABELS,
+  FlowIntensity, DischargeType, Symptom, Mood,
+  SYMPTOM_LABELS, MOOD_LABELS, MOOD_EMOJIS,
+  DISCHARGE_LABELS, DISCHARGE_DESCRIPTIONS, FLOW_LABELS,
 } from '../../../src/models/log';
 
 const ALL_SYMPTOMS: Symptom[] = [
@@ -21,7 +22,7 @@ const ALL_MOODS: Mood[] = [
   'happy', 'calm', 'energetic', 'anxious', 'irritable',
   'sad', 'emotional', 'focused', 'foggy', 'overwhelmed',
 ];
-const ALL_CRAVINGS: Craving[] = ['sweet', 'salty', 'fatty', 'spicy', 'carbs', 'caffeine', 'none'];
+const DISCHARGE_OPTIONS: DischargeType[] = ['none', 'sticky', 'creamy', 'watery', 'egg_white', 'atypical'];
 const FLOW_OPTIONS: FlowIntensity[] = ['none', 'spotting', 'light', 'medium', 'heavy'];
 
 export default function LogEntryScreen() {
@@ -38,9 +39,9 @@ export default function LogEntryScreen() {
 
   const [ready, setReady] = useState(false);
   const [flow, setFlow] = useState<FlowIntensity>('none');
+  const [discharge, setDischarge] = useState<DischargeType>('none');
   const [symptoms, setSymptoms] = useState<Symptom[]>([]);
   const [moods, setMoods] = useState<Mood[]>([]);
-  const [cravings, setCravings] = useState<Craving[]>([]);
   const [energy, setEnergy] = useState<1 | 2 | 3>(2);
   const [saving, setSaving] = useState(false);
 
@@ -48,9 +49,9 @@ export default function LogEntryScreen() {
     getLogForDate(targetDate).then((existing) => {
       if (existing) {
         setFlow(existing.flowIntensity);
+        setDischarge(existing.discharge);
         setSymptoms(existing.symptoms);
         setMoods(existing.moods);
-        setCravings(existing.cravings);
         setEnergy(existing.energyLevel ?? 2);
       }
       setReady(true);
@@ -73,9 +74,9 @@ export default function LogEntryScreen() {
         cycleRecordId: null,
         isPeriodDay: flow !== 'none',
         flowIntensity: flow,
+        discharge,
         symptoms,
         moods,
-        cravings,
         energyLevel: energy,
         notes: null,
       });
@@ -182,21 +183,26 @@ export default function LogEntryScreen() {
           </View>
         </SectionCard>
 
-        {/* Cravings */}
-        <SectionCard label="Cravings">
+        {/* Discharge */}
+        <SectionCard label="Discharge">
           <View style={styles.chipWrap}>
-            {ALL_CRAVINGS.map((c) => (
+            {DISCHARGE_OPTIONS.map((d) => (
               <Chip
-                key={c}
-                selected={cravings.includes(c)}
-                onPress={() => toggle(cravings, c, setCravings)}
+                key={d}
+                selected={discharge === d}
+                onPress={() => setDischarge(d)}
                 style={styles.chip}
                 showSelectedCheck
               >
-                {CRAVING_LABELS[c]}
+                {DISCHARGE_LABELS[d]}
               </Chip>
             ))}
           </View>
+          {discharge !== 'none' && (
+            <Text variant="bodySmall" style={{ color: '#888', marginTop: 2 }}>
+              {DISCHARGE_DESCRIPTIONS[discharge]}
+            </Text>
+          )}
         </SectionCard>
 
       </ScrollView>

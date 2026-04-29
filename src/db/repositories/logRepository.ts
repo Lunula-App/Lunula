@@ -1,13 +1,13 @@
 import { getDatabase, generateId, nowIso } from '../client';
 import {
-  DailyLog, FlowIntensity, Symptom, Mood, Craving,
-  SYMPTOM_LABELS, MOOD_LABELS, CRAVING_LABELS,
+  DailyLog, FlowIntensity, DischargeType, Symptom, Mood,
+  SYMPTOM_LABELS, MOOD_LABELS,
 } from '../../models/log';
 
 // Derive valid value sets from the label records so there's a single source of truth
 const VALID_SYMPTOMS = new Set<string>(Object.keys(SYMPTOM_LABELS));
 const VALID_MOODS = new Set<string>(Object.keys(MOOD_LABELS));
-const VALID_CRAVINGS = new Set<string>(Object.keys(CRAVING_LABELS));
+const VALID_DISCHARGE = new Set<string>(['none', 'sticky', 'creamy', 'watery', 'egg_white', 'atypical']);
 
 function safeParseArray<T extends string>(
   raw: string | null | undefined,
@@ -25,15 +25,16 @@ function safeParseArray<T extends string>(
 }
 
 function rowToLog(row: Record<string, unknown>): DailyLog {
+  const rawDischarge = row.discharge as string | null;
   return {
     id: row.id as string,
     date: row.date as string,
     cycleRecordId: row.cycle_record_id as string | null,
     isPeriodDay: Boolean(row.is_period_day),
     flowIntensity: row.flow_intensity as FlowIntensity,
+    discharge: (rawDischarge && VALID_DISCHARGE.has(rawDischarge) ? rawDischarge : 'none') as DischargeType,
     symptoms: safeParseArray<Symptom>(row.symptoms as string, VALID_SYMPTOMS),
     moods: safeParseArray<Mood>(row.moods as string, VALID_MOODS),
-    cravings: safeParseArray<Craving>(row.cravings as string, VALID_CRAVINGS),
     energyLevel: (row.energy_level as 1 | 2 | 3 | null) ?? null,
     notes: row.notes as string | null,
     createdAt: row.created_at as string,
@@ -73,16 +74,16 @@ export async function upsertLog(
     await db.runAsync(
       `UPDATE daily_logs SET
         cycle_record_id = ?, is_period_day = ?, flow_intensity = ?,
-        symptoms = ?, moods = ?, cravings = ?,
+        discharge = ?, symptoms = ?, moods = ?,
         energy_level = ?, notes = ?, updated_at = ?
       WHERE date = ?`,
       [
         log.cycleRecordId ?? null,
         log.isPeriodDay ? 1 : 0,
         log.flowIntensity,
+        log.discharge,
         JSON.stringify(log.symptoms),
         JSON.stringify(log.moods),
-        JSON.stringify(log.cravings),
         log.energyLevel ?? null,
         log.notes ?? null,
         now,
@@ -95,7 +96,7 @@ export async function upsertLog(
     await db.runAsync(
       `INSERT INTO daily_logs (
         id, date, cycle_record_id, is_period_day, flow_intensity,
-        symptoms, moods, cravings, energy_level, notes,
+        discharge, symptoms, moods, energy_level, notes,
         created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -104,9 +105,9 @@ export async function upsertLog(
         log.cycleRecordId ?? null,
         log.isPeriodDay ? 1 : 0,
         log.flowIntensity,
+        log.discharge,
         JSON.stringify(log.symptoms),
         JSON.stringify(log.moods),
-        JSON.stringify(log.cravings),
         log.energyLevel ?? null,
         log.notes ?? null,
         now,

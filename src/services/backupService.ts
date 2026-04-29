@@ -222,7 +222,7 @@ export async function restoreBackup(data: BackupData): Promise<void> {
       await db.runAsync(
         `INSERT INTO daily_logs (
           id, date, cycle_record_id, is_period_day, flow_intensity,
-          symptoms, moods, cravings, energy_level, notes,
+          discharge, symptoms, moods, energy_level, notes,
           created_at, updated_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
@@ -231,9 +231,9 @@ export async function restoreBackup(data: BackupData): Promise<void> {
           log.cycleRecordId ?? null,
           log.isPeriodDay ? 1 : 0,
           log.flowIntensity,
+          (log as any).discharge ?? 'none',
           JSON.stringify(log.symptoms ?? []),
           JSON.stringify(log.moods ?? []),
-          JSON.stringify(log.cravings ?? []),
           log.energyLevel ?? null,
           log.notes ?? null,
           log.createdAt ?? now,
