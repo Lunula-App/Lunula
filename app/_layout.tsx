@@ -5,11 +5,14 @@ import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
-import { initDatabase } from '../src/db/client';
+import { initDatabase, todayDate } from '../src/db/client';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { useAuthStore } from '../src/stores/authStore';
 import { buildTheme } from '../src/theme';
 import { AccentKey } from '../src/theme/accents';
+import { syncNotifications, dismissCompletedNotificationsFromTray } from '../src/services/notificationService';
+import { getLogForDate } from '../src/db/repositories/logRepository';
+import { getSessionsForDate } from '../src/db/repositories/exerciseRepository';
 
 export default function RootLayout() {
   const [dbReady, setDbReady] = useState(false);
@@ -47,6 +50,24 @@ export default function RootLayout() {
           if (cancelTimer) {
             cancelTimer();
             cancelTimer = null;
+          }
+          // Re-sync notifications on foreground: restores DAILY triggers that
+          // were temporarily replaced with one-shot DATE triggers on completion
+          // days, and clears any stale notifications from the system tray.
+          const currentSettings = useSettingsStore.getState().settings;
+          if (currentSettings) {
+            (async () => {
+              const today = todayDate();
+              const [log, sessions] = await Promise.all([
+                getLogForDate(today),
+                getSessionsForDate(today),
+              ]);
+              await syncNotifications(currentSettings, {
+                log: !!log,
+                kegel: sessions.length > 0,
+              });
+              await dismissCompletedNotificationsFromTray();
+            })().catch(() => {});
           }
         }
       }

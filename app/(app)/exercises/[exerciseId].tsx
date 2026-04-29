@@ -8,6 +8,7 @@ import { computePrediction } from '../../../src/services/cycleEngine';
 import { getExerciseById } from '../../../src/content/exercises/definitions';
 import { saveExerciseSession } from '../../../src/db/repositories/exerciseRepository';
 import { todayDate } from '../../../src/db/client';
+import { syncNotifications } from '../../../src/services/notificationService';
 import PulsingCircle from '../../../src/components/exercises/PulsingCircle';
 import { CyclePhase } from '../../../src/models/cycle';
 import { PHASE_COLORS } from '../../../src/theme/colors';
@@ -140,6 +141,10 @@ export default function ExercisePlayerScreen() {
       durationSeconds: duration,
       notes: null,
     });
+    const currentSettings = useSettingsStore.getState().settings;
+    if (currentSettings) {
+      syncNotifications(currentSettings, { kegel: true }).catch(() => {});
+    }
   }
 
   async function handleFinish() {

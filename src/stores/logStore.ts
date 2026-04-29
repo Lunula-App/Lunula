@@ -48,10 +48,11 @@ export const useLogStore = create<LogState>((set) => ({
     // Reload settings so the rest of the app picks up any updated averages
     await useSettingsStore.getState().load();
 
-    // Reschedule the period reminder with the freshly updated prediction
+    // Sync notifications: suppress today's log reminder and update the period
+    // reminder with the freshly updated prediction.
     const updatedSettings = useSettingsStore.getState().settings;
-    if (updatedSettings?.notifyPeriodReminder) {
-      syncNotifications(updatedSettings).catch(() => {});
+    if (updatedSettings) {
+      syncNotifications(updatedSettings, { log: true }).catch(() => {});
     }
   },
 }));

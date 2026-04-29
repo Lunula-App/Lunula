@@ -9,12 +9,24 @@
  * Scheduling strategy: all scheduled notifications are cancelled and
  * re-scheduled whenever the user saves their notification preferences.
  * This keeps things simple — no stale notifications accumulate.
+ *
+ * Completion-aware suppression:
+ *   - setNotificationHandler checks the DB before showing a notification
+ *     while the app is in the foreground.
+ *   - syncNotifications accepts a completedToday map; when an activity is
+ *     done and its notification hasn't fired yet, the trigger is moved to a
+ *     one-shot DATE for tomorrow so today's slot is skipped entirely.
+ *   - dismissCompletedNotificationsFromTray removes any already-delivered
+ *     notifications from the system tray when the app returns to the foreground.
  */
 
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { UserSettings } from '../models/cycle';
 import { computePrediction } from './cycleEngine';
+import { getLogForDate } from '../db/repositories/logRepository';
+import { getSessionsForDate } from '../db/repositories/exerciseRepository';
+import { todayDate } from '../db/client';
 
 // Notification IDs used as identifiers so we can cancel/replace them
 const ID_DAILY_LOG = 'lunula_daily_log';
@@ -22,14 +34,40 @@ const ID_PERIOD_REMINDER = 'lunula_period_reminder';
 const ID_KEGEL = 'lunula_kegel';
 const ID_BACKUP_PREFIX = 'lunula_backup_';
 
+const SHOW = {
+  shouldShowAlert: true,
+  shouldShowBanner: true,
+  shouldShowList: true,
+  shouldPlaySound: true,
+  shouldSetBadge: false,
+};
+
+const SUPPRESS = {
+  shouldShowAlert: false,
+  shouldShowBanner: false,
+  shouldShowList: false,
+  shouldPlaySound: false,
+  shouldSetBadge: false,
+};
+
+// Suppress notifications in the foreground when the activity is already done today.
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async (notification) => {
+    const id = notification.request.identifier;
+    const today = todayDate();
+
+    if (id === ID_DAILY_LOG) {
+      const log = await getLogForDate(today);
+      if (log) return SUPPRESS;
+    }
+
+    if (id === ID_KEGEL) {
+      const sessions = await getSessionsForDate(today);
+      if (sessions.length > 0) return SUPPRESS;
+    }
+
+    return SHOW;
+  },
 });
 
 // ── Permissions ────────────────────────────────────────────────────────────────
@@ -69,15 +107,42 @@ async function cancelNotification(id: string) {
 
 // ── Schedule / cancel ──────────────────────────────────────────────────────────
 
-async function scheduleDailyLog(time: string) {
+async function scheduleDailyLog(time: string, skipToday = false) {
   await cancelNotification(ID_DAILY_LOG);
   const { hour, minute } = parseTime(time);
+  const content = {
+    title: "Time to check in 🌸",
+    body: "Log how you're feeling today in Lunula.",
+  };
+
+  if (skipToday) {
+    const now = new Date();
+    const todayFire = new Date();
+    todayFire.setHours(hour, minute, 0, 0);
+
+    if (todayFire > now) {
+      // Notification hasn't fired yet — schedule one-shot for tomorrow so
+      // today's slot is skipped, then syncNotifications will restore DAILY
+      // next time the app comes to the foreground.
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(hour, minute, 0, 0);
+      await Notifications.scheduleNotificationAsync({
+        identifier: ID_DAILY_LOG,
+        content,
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: tomorrow,
+        },
+      });
+      return;
+    }
+    // Time has already passed — DAILY trigger naturally starts from tomorrow.
+  }
+
   await Notifications.scheduleNotificationAsync({
     identifier: ID_DAILY_LOG,
-    content: {
-      title: "Time to check in 🌸",
-      body: "Log how you're feeling today in Lunula.",
-    },
+    content,
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
       hour,
@@ -148,15 +213,38 @@ async function scheduleBackupReminders(intervalWeeks: 1 | 2 | 4) {
   }
 }
 
-async function scheduleKegel(time: string) {
+async function scheduleKegel(time: string, skipToday = false) {
   await cancelNotification(ID_KEGEL);
   const { hour, minute } = parseTime(time);
+  const content = {
+    title: 'Kegel reminder',
+    body: 'A few minutes of pelvic floor exercises makes a difference.',
+  };
+
+  if (skipToday) {
+    const now = new Date();
+    const todayFire = new Date();
+    todayFire.setHours(hour, minute, 0, 0);
+
+    if (todayFire > now) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(hour, minute, 0, 0);
+      await Notifications.scheduleNotificationAsync({
+        identifier: ID_KEGEL,
+        content,
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: tomorrow,
+        },
+      });
+      return;
+    }
+  }
+
   await Notifications.scheduleNotificationAsync({
     identifier: ID_KEGEL,
-    content: {
-      title: 'Kegel reminder',
-      body: 'A few minutes of pelvic floor exercises makes a difference.',
-    },
+    content,
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
       hour,
@@ -169,11 +257,19 @@ async function scheduleKegel(time: string) {
 
 /**
  * Re-schedules (or cancels) all notifications based on current settings.
- * Call this after the user changes any notification preference.
+ * Call this after the user changes any notification preference, and on every
+ * app foreground to restore DAILY triggers that were temporarily replaced with
+ * one-shot DATE triggers on completion days.
+ *
+ * completedToday.log   — true if the daily log has been saved today
+ * completedToday.kegel — true if any exercise session has been saved today
  */
-export async function syncNotifications(settings: UserSettings): Promise<void> {
+export async function syncNotifications(
+  settings: UserSettings,
+  completedToday: { log?: boolean; kegel?: boolean } = {}
+): Promise<void> {
   if (settings.notifyDailyLog) {
-    await scheduleDailyLog(settings.notifyDailyLogTime);
+    await scheduleDailyLog(settings.notifyDailyLogTime, completedToday.log ?? false);
   } else {
     await cancelNotification(ID_DAILY_LOG);
   }
@@ -185,7 +281,7 @@ export async function syncNotifications(settings: UserSettings): Promise<void> {
   }
 
   if (settings.notifyKegel) {
-    await scheduleKegel(settings.notifyKegelTime);
+    await scheduleKegel(settings.notifyKegelTime, completedToday.kegel ?? false);
   } else {
     await cancelNotification(ID_KEGEL);
   }
@@ -195,6 +291,28 @@ export async function syncNotifications(settings: UserSettings): Promise<void> {
   } else {
     await cancelBackupReminders();
   }
+}
+
+/**
+ * Removes already-delivered log and kegel notifications from the system tray
+ * if the corresponding activity has been completed today.
+ * Call this when the app returns to the foreground.
+ */
+export async function dismissCompletedNotificationsFromTray(): Promise<void> {
+  const today = todayDate();
+  const [log, sessions] = await Promise.all([
+    getLogForDate(today),
+    getSessionsForDate(today),
+  ]);
+
+  await Promise.all([
+    log
+      ? Notifications.dismissNotificationAsync(ID_DAILY_LOG).catch(() => {})
+      : Promise.resolve(),
+    sessions.length > 0
+      ? Notifications.dismissNotificationAsync(ID_KEGEL).catch(() => {})
+      : Promise.resolve(),
+  ]);
 }
 
 /** Cancels every Lunula notification (used when permissions are revoked). */
