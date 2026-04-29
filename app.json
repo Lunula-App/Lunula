@@ -20,7 +20,8 @@
         "NSPrivacyAccessedAPITypes": []
       },
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Lunula uses Face ID to protect access to your health data."
+        "NSFaceIDUsageDescription": "Lunula uses Face ID to protect access to your health data.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
