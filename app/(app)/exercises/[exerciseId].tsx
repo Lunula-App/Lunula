@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Text, Button, useTheme, Surface } from 'react-native-paper';
+import { Text, Button, useTheme, Surface, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import * as Speech from 'expo-speech';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { computePrediction } from '../../../src/services/cycleEngine';
 import { getExerciseById } from '../../../src/content/exercises/definitions';
@@ -34,6 +35,9 @@ export default function ExercisePlayerScreen() {
   const [countdown, setCountdown] = useState(0);
   const [setsCompleted, setSetsCompleted] = useState(0);
   const [startTime, setStartTime] = useState<number>(0);
+  const [audioEnabled, setAudioEnabled] = useState(
+    settings?.exerciseAudioCues ?? false
+  );
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -43,6 +47,38 @@ export default function ExercisePlayerScreen() {
       timerRef.current = null;
     }
   };
+
+  // Speak phase cues whenever animPhase transitions (only while audio is enabled)
+  const prevAnimPhaseRef = useRef<AnimPhase>('idle');
+  useEffect(() => {
+    if (animPhase === prevAnimPhaseRef.current) return;
+    prevAnimPhaseRef.current = animPhase;
+    if (!audioEnabled) return;
+
+    Speech.stop();
+    if (animPhase === 'hold') {
+      Speech.speak('Squeeze', { rate: 1.0 });
+    } else if (animPhase === 'relax') {
+      Speech.speak('Release', { rate: 1.0 });
+    } else if (animPhase === 'rest') {
+      Speech.speak('Rest', { rate: 1.0 });
+    }
+  }, [animPhase, audioEnabled, exercise]);
+
+  // Speak completion cue
+  useEffect(() => {
+    if (sessionState === 'complete' && audioEnabled) {
+      Speech.stop();
+      Speech.speak('Well done', { rate: 1.0 });
+    }
+  }, [sessionState, audioEnabled]);
+
+  // Stop speech when audio is toggled off or screen unmounts
+  useEffect(() => {
+    if (!audioEnabled) Speech.stop();
+  }, [audioEnabled]);
+
+  useEffect(() => () => { Speech.stop(); }, []);
 
   const runRep = useCallback(
     (rep: number, set: number) => {
@@ -252,11 +288,20 @@ export default function ExercisePlayerScreen() {
 
       {sessionState === 'running' && (
         <View style={styles.runningContainer}>
-          <Text variant="labelMedium" style={[styles.setLabel, { color: theme.colors.onSurfaceVariant }]}>
-            {animPhase === 'rest'
-              ? `REST — SET ${currentSet} OF ${exercise.sets} COMPLETE`
-              : `SET ${currentSet} OF ${exercise.sets}`}
-          </Text>
+          <View style={styles.runningHeader}>
+            <Text variant="labelMedium" style={[styles.setLabel, { color: theme.colors.onSurfaceVariant }]}>
+              {animPhase === 'rest'
+                ? `REST — SET ${currentSet} OF ${exercise.sets} COMPLETE`
+                : `SET ${currentSet} OF ${exercise.sets}`}
+            </Text>
+            <IconButton
+              icon={audioEnabled ? 'volume-high' : 'volume-off'}
+              size={20}
+              iconColor={audioEnabled ? theme.colors.primary : theme.colors.onSurfaceVariant}
+              onPress={() => setAudioEnabled((v) => !v)}
+              style={styles.audioToggle}
+            />
+          </View>
 
           <PulsingCircle
             phase={animPhase}
@@ -343,7 +388,9 @@ const styles = StyleSheet.create({
   startBtn: { borderRadius: 28, marginTop: 8 },
   startBtnContent: { paddingVertical: 8 },
   runningContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 40 },
+  runningHeader: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   setLabel: { fontWeight: '700', letterSpacing: 1 },
+  audioToggle: { margin: 0 },
   skipBtn: { borderRadius: 28, minWidth: 140 },
   stopBtn: { borderRadius: 28, minWidth: 140 },
   completeContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 32 },

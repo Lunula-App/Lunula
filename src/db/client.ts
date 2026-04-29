@@ -45,6 +45,7 @@ export async function initDatabase(): Promise<void> {
     `ALTER TABLE user_settings ADD COLUMN notify_backup INTEGER NOT NULL DEFAULT 0`,
     `ALTER TABLE user_settings ADD COLUMN notify_backup_interval_weeks INTEGER NOT NULL DEFAULT 2`,
     `ALTER TABLE daily_logs ADD COLUMN discharge TEXT NOT NULL DEFAULT 'none'`,
+    `ALTER TABLE user_settings ADD COLUMN exercise_audio_cues INTEGER NOT NULL DEFAULT 0`,
   ];
 
   for (const migration of migrations) {

@@ -255,6 +255,14 @@ export default function SettingsScreen() {
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
             onPress={() => router.push('/(app)/settings/appearance')}
           />
+          <Divider />
+          <List.Item
+            title="Accessibility"
+            description="Audio cues for exercises"
+            left={(props) => <List.Icon {...props} icon="human" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/(app)/settings/accessibility')}
+          />
         </Surface>
 
         {/* Data & Backup */}

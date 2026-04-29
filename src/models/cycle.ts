@@ -25,6 +25,7 @@ export interface UserSettings {
   notifyKegelTime: string;           // HH:MM
   notifyBackup: boolean;
   notifyBackupIntervalWeeks: 1 | 2 | 4;
+  exerciseAudioCues: boolean;
   createdAt: string;
   updatedAt: string;
 }

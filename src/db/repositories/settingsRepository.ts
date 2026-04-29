@@ -27,6 +27,7 @@ function rowToSettings(row: Record<string, unknown>): UserSettings {
     notifyKegelTime: (row.notify_kegel_time as string) ?? '09:00',
     notifyBackup: Boolean(row.notify_backup),
     notifyBackupIntervalWeeks: ((row.notify_backup_interval_weeks as number) ?? 2) as 1 | 2 | 4,
+    exerciseAudioCues: Boolean(row.exercise_audio_cues),
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
@@ -60,8 +61,9 @@ export async function saveSettings(
         notify_kegel, notify_kegel_time,
         is_irregular, min_cycle_length, max_cycle_length,
         notify_backup, notify_backup_interval_weeks,
+        exercise_audio_cues,
         created_at, updated_at
-      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         partial.avgCycleLength ?? 28,
         partial.avgPeriodDuration ?? 5,
@@ -86,6 +88,7 @@ export async function saveSettings(
         partial.maxCycleLength ?? null,
         partial.notifyBackup ? 1 : 0,
         partial.notifyBackupIntervalWeeks ?? 2,
+        partial.exerciseAudioCues ? 1 : 0,
         now,
         now,
       ]
@@ -105,6 +108,7 @@ export async function saveSettings(
         notify_kegel = ?, notify_kegel_time = ?,
         is_irregular = ?, min_cycle_length = ?, max_cycle_length = ?,
         notify_backup = ?, notify_backup_interval_weeks = ?,
+        exercise_audio_cues = ?,
         updated_at = ?
       WHERE id = 1`,
       [
@@ -131,6 +135,7 @@ export async function saveSettings(
         merged.maxCycleLength ?? null,
         merged.notifyBackup ? 1 : 0,
         merged.notifyBackupIntervalWeeks,
+        merged.exerciseAudioCues ? 1 : 0,
         now,
       ]
     );
