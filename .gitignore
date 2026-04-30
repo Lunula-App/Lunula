@@ -33,8 +33,8 @@ yarn-error.*
 # local env files
 .env*.local
 
-# Claude Code local settings (may contain credentials from CLI history)
-.claude/settings.local.json
+# Claude Code local settings
+.claude/
 
 # typescript
 *.tsbuildinfo

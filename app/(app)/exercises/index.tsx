@@ -7,7 +7,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { computePrediction } from '../../../src/services/cycleEngine';
 import { getExercisesForPhase, EXERCISES } from '../../../src/content/exercises/definitions';
-import { getSessionsForDate } from '../../../src/db/repositories/exerciseRepository';
+import { getSessionsForDate, hasEverCompletedExercise } from '../../../src/db/repositories/exerciseRepository';
 import { todayDate } from '../../../src/db/client';
 import { useExerciseStore } from '../../../src/stores/exerciseStore';
 import { ExerciseDefinition } from '../../../src/models/exercise';
@@ -29,6 +29,7 @@ export default function ExercisesScreen() {
   const { settings } = useSettingsStore();
   const [userLevel, setUserLevel] = useState<ProgressionLevel>(1);
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
+  const [tutorialDone, setTutorialDone] = useState(false);
   const { streak, last7, sessionDates, load: loadStreak } = useExerciseStore();
 
   useFocusEffect(
@@ -36,6 +37,7 @@ export default function ExercisesScreen() {
       getSessionsForDate(todayDate()).then((sessions) => {
         setCompletedIds(new Set(sessions.map((s) => s.exerciseId)));
       });
+      hasEverCompletedExercise(tutorial.id).then(setTutorialDone);
       loadStreak();
       getUserProgressionLevel().then(setUserLevel);
     }, [])
@@ -114,8 +116,8 @@ export default function ExercisesScreen() {
           </View>
         </Surface>
 
-        {/* Tutorial card — hidden once completed */}
-        {!completedIds.has(tutorial.id) && (
+        {/* Tutorial card — hidden once ever completed */}
+        {!tutorialDone && (
           <>
             <Text variant="titleSmall" style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant }]}>
               NEW HERE?

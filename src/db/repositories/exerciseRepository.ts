@@ -59,6 +59,16 @@ export async function getRecentSessions(limitDays = 30): Promise<ExerciseSession
   return rows.map(rowToSession);
 }
 
+/** Returns true if the given exercise has ever been completed. */
+export async function hasEverCompletedExercise(exerciseId: string): Promise<boolean> {
+  const db = getDatabase();
+  const row = await db.getFirstAsync<{ n: number }>(
+    'SELECT COUNT(*) as n FROM exercise_sessions WHERE exercise_id = ?',
+    [exerciseId]
+  );
+  return (row?.n ?? 0) > 0;
+}
+
 /** Returns the set of distinct dates (YYYY-MM-DD) that have at least one session. */
 export async function getSessionDateSet(): Promise<Set<string>> {
   const db = getDatabase();
