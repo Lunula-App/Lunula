@@ -91,8 +91,8 @@ export default function WelcomeScreen() {
     if (!importData) return;
     setImporting(true);
     try {
-      await useAuthStore.getState().removePin(); // clear any existing PIN before overwriting data
       await restoreBackup(importData);
+      await useAuthStore.getState().removePin();
       await useSettingsStore.getState().load();
       await useLogStore.getState().loadToday();
       await useAuthStore.getState().checkSetup();

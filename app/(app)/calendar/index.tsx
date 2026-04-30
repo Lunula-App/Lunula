@@ -41,7 +41,7 @@ export default function CalendarScreen() {
   }, []);
 
   const markedDates = useMemo<MarkedDates>(() => {
-    if (!settings) return {};
+    if (!settings || settings.avgCycleLength < 21) return {};
 
     const marks: MarkedDates = {};
     const today = new Date();
@@ -84,13 +84,13 @@ export default function CalendarScreen() {
   }, [settings, recentLogs, theme]);
 
   const prediction = useMemo(() => {
-    if (!settings) return null;
+    if (!settings || settings.avgCycleLength < 21) return null;
     return computePrediction(settings);
   }, [settings]);
 
   // Phase trends: count mood/symptom occurrences per phase across all recent logs
   const phaseTrends = useMemo(() => {
-    if (!settings || recentLogs.length === 0) return null;
+    if (!settings || settings.avgCycleLength < 21 || recentLogs.length === 0) return null;
 
     const phases: CyclePhase[] = ['menstrual', 'follicular', 'ovulatory', 'luteal'];
     const counts: Record<CyclePhase, { moods: Map<Mood, number>; symptoms: Map<Symptom, number>; days: number }> = {

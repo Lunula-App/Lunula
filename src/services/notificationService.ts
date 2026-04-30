@@ -161,11 +161,21 @@ async function schedulePeriodReminder(settings: UserSettings) {
     ? prediction.nextPeriodEarliestDate
     : prediction.nextPeriodDate;
 
+  const periodDate = new Date(anchorDate);
   const targetDate = new Date(anchorDate);
   targetDate.setDate(targetDate.getDate() - settings.notifyPeriodDaysBefore);
   targetDate.setHours(9, 0, 0, 0);
 
-  if (targetDate.getTime() <= Date.now()) return;
+  if (targetDate.getTime() <= Date.now()) {
+    // Reminder window passed — if the period itself is still upcoming, fire at
+    // the next 9 AM so the user still gets an alert rather than nothing.
+    if (periodDate.getTime() <= Date.now()) return;
+    targetDate.setTime(Date.now());
+    targetDate.setHours(9, 0, 0, 0);
+    if (targetDate.getTime() <= Date.now()) {
+      targetDate.setDate(targetDate.getDate() + 1);
+    }
+  }
 
   const body = prediction.isIrregular
     ? 'Your period window is approaching. Take care of yourself.'

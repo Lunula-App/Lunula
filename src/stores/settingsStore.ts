@@ -14,8 +14,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   isLoaded: false,
 
   load: async () => {
-    const settings = await getSettings();
-    set({ settings, isLoaded: true });
+    try {
+      const settings = await getSettings();
+      set({ settings, isLoaded: true });
+    } catch {
+      set({ settings: null, isLoaded: true });
+    }
   },
 
   update: async (partial) => {

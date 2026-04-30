@@ -69,16 +69,21 @@ export default function LastPeriodScreen() {
       const startDate = subDays(endDate, parseInt(periodDuration ?? '5') - 1);
 
       const irregular = isIrregular === '1';
+      const clampCycle = (v: number) => Math.min(45, Math.max(21, v));
+      const clampPeriod = (v: number) => Math.min(8, Math.max(2, v));
+      const minLen = clampCycle(parseInt(minCycleLength ?? '21'));
+      const maxLen = clampCycle(parseInt(maxCycleLength ?? '35'));
+
       await updateSettings({
         avgCycleLength: irregular
-          ? Math.round((parseInt(minCycleLength ?? '21') + parseInt(maxCycleLength ?? '35')) / 2)
-          : parseInt(cycleLength ?? '28'),
-        avgPeriodDuration: parseInt(periodDuration ?? '5'),
+          ? Math.round((minLen + maxLen) / 2)
+          : clampCycle(parseInt(cycleLength ?? '28')),
+        avgPeriodDuration: clampPeriod(parseInt(periodDuration ?? '5')),
         lastPeriodEndDate: format(endDate, 'yyyy-MM-dd'),
         lastPeriodStartDate: format(startDate, 'yyyy-MM-dd'),
         isIrregular: irregular,
-        minCycleLength: irregular ? parseInt(minCycleLength ?? '21') : null,
-        maxCycleLength: irregular ? parseInt(maxCycleLength ?? '35') : null,
+        minCycleLength: irregular ? minLen : null,
+        maxCycleLength: irregular ? maxLen : null,
         onboardingComplete: true,
       });
 

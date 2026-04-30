@@ -42,17 +42,18 @@ export const useLogStore = create<LogState>((set) => ({
       todayLog: log.date === today ? saved : state.todayLog,
     }));
 
-    // Reconcile cycle records and update adaptive averages
-    await reconcileCycles(allLogs);
-
-    // Reload settings so the rest of the app picks up any updated averages
-    await useSettingsStore.getState().load();
-
-    // Sync notifications: suppress today's log reminder and update the period
-    // reminder with the freshly updated prediction.
-    const updatedSettings = useSettingsStore.getState().settings;
-    if (updatedSettings) {
-      syncNotifications(updatedSettings, { log: true }).catch(() => {});
+    // Reconcile cycle records, reload settings, and sync notifications.
+    // Wrapped so a reconciler failure doesn't surface to the user — the log
+    // is already saved and that's what matters.
+    try {
+      await reconcileCycles(allLogs);
+      await useSettingsStore.getState().load();
+      const updatedSettings = useSettingsStore.getState().settings;
+      if (updatedSettings) {
+        syncNotifications(updatedSettings, { log: true }).catch(() => {});
+      }
+    } catch {
+      // non-critical: period reminder may be slightly stale until next log save
     }
   },
 }));
