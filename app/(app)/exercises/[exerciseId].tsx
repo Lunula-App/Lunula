@@ -24,7 +24,7 @@ export default function ExercisePlayerScreen() {
   const { settings } = useSettingsStore();
 
   const exercise = getExerciseById(exerciseId ?? '');
-  const currentPhase: CyclePhase = settings
+  const currentPhase: CyclePhase = settings && settings.avgCycleLength >= 21
     ? computePrediction(settings).currentPhase
     : 'follicular';
 
@@ -144,6 +144,7 @@ export default function ExercisePlayerScreen() {
   );
 
   function handleStart() {
+    savedRef.current = false;
     setSessionState('running');
     setStartTime(Date.now());
     runRep(1, 1);
@@ -156,6 +157,7 @@ export default function ExercisePlayerScreen() {
   }
 
   function handleStop() {
+    savedRef.current = true; // prevent auto-save after explicitly stopping
     clearTimer();
     setAnimPhase('idle');
     setSessionState('preview');
@@ -191,7 +193,6 @@ export default function ExercisePlayerScreen() {
   // Auto-save if the user navigates away while on the complete screen
   useFocusEffect(
     useCallback(() => {
-      savedRef.current = false;
       return () => {
         if (sessionState === 'complete') {
           saveSession();

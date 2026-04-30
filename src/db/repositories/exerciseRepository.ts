@@ -83,11 +83,10 @@ export function calculateStreak(sessionDates: Set<string>): number {
   let streak = 0;
   const today = new Date();
   for (let i = 0; i < 365; i++) {
-    const d = new Date(today);
-    d.setUTCDate(today.getUTCDate() - i);
-    const y = d.getUTCFullYear();
-    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(d.getUTCDate()).padStart(2, '0');
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
     if (sessionDates.has(`${y}-${m}-${day}`)) {
       streak++;
     } else {
@@ -102,11 +101,10 @@ export function lastNDates(n: number): string[] {
   const dates: string[] = [];
   const today = new Date();
   for (let i = n - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setUTCDate(today.getUTCDate() - i);
-    const y = d.getUTCFullYear();
-    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(d.getUTCDate()).padStart(2, '0');
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
     dates.push(`${y}-${m}-${day}`);
   }
   return dates;

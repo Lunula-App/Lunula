@@ -98,7 +98,8 @@ export default function RootLayout() {
 
     if (!isUnlocked && hasPinSetup) {
       // Onboarded but locked
-      if (segments.join('/') !== '(auth)/lock') {
+      const inLockScreen = segments[0] === '(auth)' && segments[1] === 'lock';
+      if (!inLockScreen) {
         router.replace('/(auth)/lock');
       }
       return;

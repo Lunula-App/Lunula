@@ -84,7 +84,7 @@ export async function createBackup(passphrase: string): Promise<string> {
     payload,
   };
 
-  const filename = `lunula_backup_${Date.now()}.lunula`;
+  const filename = `lunula_backup_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.lunula`;
   const path = `${FileSystem.documentDirectory}${filename}`;
   await FileSystem.writeAsStringAsync(path, JSON.stringify(file), {
     encoding: FileSystem.EncodingType.UTF8,

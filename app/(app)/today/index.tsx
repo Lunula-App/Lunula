@@ -28,7 +28,7 @@ export default function TodayScreen() {
   const [exercisedToday, setExercisedToday] = useState(false);
 
   useEffect(() => {
-    if (settings) {
+    if (settings && settings.avgCycleLength >= 21) {
       setPrediction(computePrediction(settings));
     }
   }, [settings]);

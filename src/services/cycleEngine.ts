@@ -134,12 +134,12 @@ export function computePrediction(
     daysUntilLatest,
     currentCycleDay: currentDay,
     phaseDay: Math.max(1, currentDay - phaseStartDay + 1),
-    phaseTotalDays: getPhaseDuration(
+    phaseTotalDays: Math.max(1, getPhaseDuration(
       phase,
       effectivePeriodDuration,
       ovulationDay,
       settings.avgCycleLength
-    ),
+    )),
     phaseLabel: phase.charAt(0).toUpperCase() + phase.slice(1) + ' Phase',
     isIrregular: settings.isIrregular,
   };

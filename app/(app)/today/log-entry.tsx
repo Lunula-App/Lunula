@@ -15,7 +15,7 @@ import {
 
 const ALL_SYMPTOMS: Symptom[] = [
   'cramps', 'bloating', 'headache', 'backache', 'breast_tenderness',
-  'acne', 'nausea', 'fatigue', 'insomnia', 'dizziness',
+  'acne', 'nausea', 'fatigue', 'insomnia', 'dizziness', 'hot_flashes',
   'pelvic_pain', 'constipation', 'diarrhea',
 ];
 const ALL_MOODS: Mood[] = [
@@ -33,7 +33,9 @@ export default function LogEntryScreen() {
 
   // Validate the param is a proper YYYY-MM-DD date; fall back to today if not
   const today = todayDate();
-  const isValidDate = dateParam ? /^\d{4}-\d{2}-\d{2}$/.test(dateParam) && !isNaN(Date.parse(dateParam)) : false;
+  const isValidDate = dateParam
+    ? /^\d{4}-\d{2}-\d{2}$/.test(dateParam) && !isNaN(Date.parse(dateParam)) && dateParam >= '2000-01-01'
+    : false;
   const targetDate = (isValidDate && dateParam! <= today) ? dateParam! : today;
   const isToday = targetDate === today;
 

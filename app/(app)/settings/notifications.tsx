@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, StyleSheet, ScrollView, Modal, TouchableOpacity, FlatList } from 'react-native';
+import { View, StyleSheet, ScrollView, Modal, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { Text, useTheme, Surface, List, Switch, Divider, Button, MD3Theme, SegmentedButtons } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -27,7 +27,14 @@ export default function NotificationsScreen() {
   ) {
     if (value) {
       const granted = await requestNotificationPermission();
-      if (!granted) return;
+      if (!granted) {
+        Alert.alert(
+          'Notifications disabled',
+          'To receive reminders from Lunula, enable notifications for this app in your device Settings.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
     }
     const updated = { ...settings!, [field]: value };
     await update({ [field]: value });

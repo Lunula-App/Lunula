@@ -198,6 +198,11 @@ export default function ProfileScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
+        {isIrregular && !rangeValid && (
+          <Text variant="bodySmall" style={{ color: theme.colors.error, textAlign: 'center', marginBottom: 8 }}>
+            Longest cycle must be greater than shortest cycle.
+          </Text>
+        )}
         <Button
           mode="contained"
           onPress={handleSave}

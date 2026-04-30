@@ -44,7 +44,7 @@ export default function ExercisesScreen() {
   );
 
   const { phase, exercises } = useMemo(() => {
-    if (!settings) return { phase: 'follicular' as CyclePhase, exercises: [] };
+    if (!settings || settings.avgCycleLength < 21) return { phase: 'follicular' as CyclePhase, exercises: [] };
     const prediction = computePrediction(settings);
     const p = prediction.currentPhase;
     const all = getExercisesForPhase(p).filter((e) => e.type !== 'tutorial');
