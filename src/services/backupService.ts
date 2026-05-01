@@ -187,9 +187,11 @@ export async function restoreBackup(data: BackupData): Promise<void> {
           notify_daily_log, notify_daily_log_time,
           notify_period_reminder, notify_period_days_before,
           notify_kegel, notify_kegel_time,
+          notify_backup, notify_backup_interval_weeks,
           is_irregular, min_cycle_length, max_cycle_length,
+          exercise_audio_cues,
           created_at, updated_at
-        ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           s.avgCycleLength ?? 28,
           s.avgPeriodDuration ?? 5,
@@ -209,9 +211,12 @@ export async function restoreBackup(data: BackupData): Promise<void> {
           s.notifyPeriodDaysBefore ?? 2,
           s.notifyKegel ? 1 : 0,
           s.notifyKegelTime ?? '09:00',
+          s.notifyBackup ? 1 : 0,
+          s.notifyBackupIntervalWeeks ?? 2,
           s.isIrregular ? 1 : 0,
           s.minCycleLength ?? null,
           s.maxCycleLength ?? null,
+          s.exerciseAudioCues ? 1 : 0,
           now,
           now,
         ]
