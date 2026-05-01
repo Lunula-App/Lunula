@@ -49,7 +49,7 @@ export const DISCHARGE_LABELS: Record<DischargeType, string> = {
   none: 'None',
   sticky: 'Sticky',
   creamy: 'Creamy',
-  watery: 'Watery',
+  watery: 'Clear',
   egg_white: 'Egg White',
   atypical: 'Unusual',
 };
@@ -58,7 +58,7 @@ export const DISCHARGE_DESCRIPTIONS: Record<DischargeType, string> = {
   none: 'Dry, no discharge',
   sticky: 'Thick, tacky — white or yellowish',
   creamy: 'Smooth, lotion-like — white or cream',
-  watery: 'Wet, slippery — clear',
+  watery: 'Thin and clear — wet, slippery feel',
   egg_white: 'Clear, stretchy — peak fertile sign',
   atypical: 'Unusual colour, odour, or texture',
 };
