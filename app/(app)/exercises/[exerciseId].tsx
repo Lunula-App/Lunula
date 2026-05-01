@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Text, Button, useTheme, Surface, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect, useNavigation } from 'expo-router';
 import * as Speech from 'expo-speech';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { computePrediction } from '../../../src/services/cycleEngine';
@@ -39,7 +39,14 @@ export default function ExercisePlayerScreen() {
     settings?.exerciseAudioCues ?? false
   );
 
+  const navigation = useNavigation();
+
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Mirrors of timer-driven state kept in refs so pause/resume reads are always current
+  const animPhaseRef = useRef<AnimPhase>('idle');
+  const countdownRef = useRef(0);
+  const currentRepRef = useRef(1);
+  const currentSetRef = useRef(1);
 
   const clearTimer = () => {
     if (timerRef.current) {
@@ -83,39 +90,38 @@ export default function ExercisePlayerScreen() {
   const runRep = useCallback(
     (rep: number, set: number) => {
       if (!exercise) return;
-      clearTimer(); // ensure no stale timer is running before starting a new one
+      clearTimer();
 
       const repHoldMs = exercise.holdDurations?.[rep - 1] ?? exercise.holdDurationMs;
       const holdSec = Math.round(repHoldMs / 1000);
       const relaxSec = Math.round(exercise.relaxDurationMs / 1000);
 
-      setAnimPhase('hold');
-      setCountdown(holdSec);
-      setCurrentRep(rep);
-      setCurrentSet(set);
+      animPhaseRef.current = 'hold'; setAnimPhase('hold');
+      countdownRef.current = holdSec; setCountdown(holdSec);
+      currentRepRef.current = rep;   setCurrentRep(rep);
+      currentSetRef.current = set;   setCurrentSet(set);
 
       let remaining = holdSec;
       timerRef.current = setInterval(() => {
         remaining -= 1;
+        countdownRef.current = remaining;
         setCountdown(remaining);
         if (remaining <= 0) {
           clearTimer();
 
           if (rep >= exercise.reps) {
-            // Set complete
             if (set >= exercise.sets) {
-              // All sets done
-              setAnimPhase('idle');
+              animPhaseRef.current = 'idle'; setAnimPhase('idle');
               setSetsCompleted(set);
               setSessionState('complete');
             } else {
-              // Rest between sets — longer dedicated rest
               const setRestSec = Math.round(exercise.setRestDurationMs / 1000);
-              setAnimPhase('rest');
+              animPhaseRef.current = 'rest'; setAnimPhase('rest');
               let restRemaining = setRestSec;
-              setCountdown(restRemaining);
+              countdownRef.current = restRemaining; setCountdown(restRemaining);
               timerRef.current = setInterval(() => {
                 restRemaining -= 1;
+                countdownRef.current = restRemaining;
                 setCountdown(restRemaining);
                 if (restRemaining <= 0) {
                   clearTimer();
@@ -124,12 +130,12 @@ export default function ExercisePlayerScreen() {
               }, 1000);
             }
           } else {
-            // Relax between reps
-            setAnimPhase('relax');
+            animPhaseRef.current = 'relax'; setAnimPhase('relax');
             let relaxRemaining = relaxSec;
-            setCountdown(relaxRemaining);
+            countdownRef.current = relaxRemaining; setCountdown(relaxRemaining);
             timerRef.current = setInterval(() => {
               relaxRemaining -= 1;
+              countdownRef.current = relaxRemaining;
               setCountdown(relaxRemaining);
               if (relaxRemaining <= 0) {
                 clearTimer();
@@ -163,6 +169,79 @@ export default function ExercisePlayerScreen() {
     setSessionState('preview');
     setCurrentRep(1);
     setCurrentSet(1);
+  }
+
+  // Resumes the current phase from where the timer was paused, reading from refs
+  // so values are always current regardless of closure age.
+  function resumeCurrentPhase() {
+    if (!exercise) return;
+    clearTimer();
+    const phase = animPhaseRef.current;
+    const remainingSecs = countdownRef.current;
+    const rep = currentRepRef.current;
+    const set = currentSetRef.current;
+
+    if (phase === 'relax') {
+      let remaining = remainingSecs;
+      timerRef.current = setInterval(() => {
+        remaining -= 1;
+        countdownRef.current = remaining;
+        setCountdown(remaining);
+        if (remaining <= 0) { clearTimer(); runRep(rep + 1, set); }
+      }, 1000);
+      return;
+    }
+
+    if (phase === 'rest') {
+      let remaining = remainingSecs;
+      timerRef.current = setInterval(() => {
+        remaining -= 1;
+        countdownRef.current = remaining;
+        setCountdown(remaining);
+        if (remaining <= 0) { clearTimer(); runRep(1, set + 1); }
+      }, 1000);
+      return;
+    }
+
+    // hold phase — duplicate the hold→relax/rest/complete transition logic
+    let remaining = remainingSecs;
+    timerRef.current = setInterval(() => {
+      remaining -= 1;
+      countdownRef.current = remaining;
+      setCountdown(remaining);
+      if (remaining <= 0) {
+        clearTimer();
+        if (rep >= exercise.reps) {
+          if (set >= exercise.sets) {
+            animPhaseRef.current = 'idle'; setAnimPhase('idle');
+            setSetsCompleted(set);
+            setSessionState('complete');
+          } else {
+            const setRestSec = Math.round(exercise.setRestDurationMs / 1000);
+            animPhaseRef.current = 'rest'; setAnimPhase('rest');
+            let restRemaining = setRestSec;
+            countdownRef.current = restRemaining; setCountdown(restRemaining);
+            timerRef.current = setInterval(() => {
+              restRemaining -= 1;
+              countdownRef.current = restRemaining;
+              setCountdown(restRemaining);
+              if (restRemaining <= 0) { clearTimer(); runRep(1, set + 1); }
+            }, 1000);
+          }
+        } else {
+          const relaxSec = Math.round(exercise.relaxDurationMs / 1000);
+          animPhaseRef.current = 'relax'; setAnimPhase('relax');
+          let relaxRemaining = relaxSec;
+          countdownRef.current = relaxRemaining; setCountdown(relaxRemaining);
+          timerRef.current = setInterval(() => {
+            relaxRemaining -= 1;
+            countdownRef.current = relaxRemaining;
+            setCountdown(relaxRemaining);
+            if (relaxRemaining <= 0) { clearTimer(); runRep(rep + 1, set); }
+          }, 1000);
+        }
+      }
+    }, 1000);
   }
 
   const savedRef = useRef(false);
@@ -201,6 +280,35 @@ export default function ExercisePlayerScreen() {
     }, [sessionState, exercise, setsCompleted, startTime])
   );
 
+  // Intercept back-navigation while an exercise is running
+  useEffect(() => {
+    const unsubscribe = (navigation as any).addListener('beforeRemove', (e: any) => {
+      if (sessionState !== 'running') return;
+      e.preventDefault();
+      clearTimer();
+      Alert.alert(
+        'Leave exercise?',
+        'Your current set will be lost.',
+        [
+          {
+            text: 'Keep Going',
+            style: 'cancel',
+            onPress: resumeCurrentPhase,
+          },
+          {
+            text: 'Leave',
+            style: 'destructive',
+            onPress: () => {
+              handleStop();
+              (navigation as any).dispatch(e.data.action);
+            },
+          },
+        ]
+      );
+    });
+    return unsubscribe;
+  }, [navigation, sessionState]);
+
   useEffect(() => () => clearTimer(), []);
 
   if (!exercise) {
@@ -224,10 +332,7 @@ export default function ExercisePlayerScreen() {
       <View style={styles.header}>
         <Button
           mode="text"
-          onPress={() => {
-            handleStop();
-            router.back();
-          }}
+          onPress={() => router.back()}
           icon="arrow-left"
         >
           Back
