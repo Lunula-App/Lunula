@@ -161,8 +161,8 @@ async function schedulePeriodReminder(settings: UserSettings) {
     ? prediction.nextPeriodEarliestDate
     : prediction.nextPeriodDate;
 
-  const periodDate = new Date(anchorDate);
-  const targetDate = new Date(anchorDate);
+  const periodDate = new Date(anchorDate + 'T00:00:00');
+  const targetDate = new Date(anchorDate + 'T00:00:00');
   targetDate.setDate(targetDate.getDate() - settings.notifyPeriodDaysBefore);
   targetDate.setHours(9, 0, 0, 0);
 

@@ -35,7 +35,6 @@ export const CREATE_TABLES = `
     flow_intensity TEXT NOT NULL DEFAULT 'none',
     symptoms TEXT NOT NULL DEFAULT '[]',
     moods TEXT NOT NULL DEFAULT '[]',
-    cravings TEXT NOT NULL DEFAULT '[]',
     energy_level INTEGER,
     notes TEXT,
     created_at TEXT NOT NULL,
