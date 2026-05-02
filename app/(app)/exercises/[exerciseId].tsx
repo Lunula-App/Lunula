@@ -4,6 +4,7 @@ import { Text, Button, useTheme, Surface, IconButton } from 'react-native-paper'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, useFocusEffect, useNavigation } from 'expo-router';
 import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { computePrediction } from '../../../src/services/cycleEngine';
 import { getExerciseById } from '../../../src/content/exercises/definitions';
@@ -62,21 +63,28 @@ export default function ExercisePlayerScreen() {
     prevAnimPhaseRef.current = animPhase;
     if (!audioEnabled) return;
 
-    Speech.stop();
-    if (animPhase === 'hold') {
-      Speech.speak('Squeeze', { rate: 1.0 });
-    } else if (animPhase === 'relax') {
-      Speech.speak('Release', { rate: 1.0 });
-    } else if (animPhase === 'rest') {
-      Speech.speak('Rest', { rate: 1.0 });
-    }
+    const cue =
+      animPhase === 'hold' ? 'Squeeze' :
+      animPhase === 'relax' ? 'Release' :
+      animPhase === 'rest' ? 'Rest' : null;
+
+    if (!cue) return;
+
+    void (async () => {
+      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+      await Speech.stop();
+      Speech.speak(cue, { rate: 0.9 });
+    })();
   }, [animPhase, audioEnabled, exercise]);
 
   // Speak completion cue
   useEffect(() => {
     if (sessionState === 'complete' && audioEnabled) {
-      Speech.stop();
-      Speech.speak('Well done', { rate: 1.0 });
+      void (async () => {
+        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+        await Speech.stop();
+        Speech.speak('Well done', { rate: 0.9 });
+      })();
     }
   }, [sessionState, audioEnabled]);
 

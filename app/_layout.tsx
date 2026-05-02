@@ -22,7 +22,7 @@ export default function RootLayout() {
   const { isUnlocked, hasPinSetup, checkSetup, lock, startBackgroundTimer } = useAuthStore();
 
   const router = useRouter();
-  const segments = useSegments();
+  const segments = useSegments() as string[];
 
   // 1. Initialise DB on first mount
   useEffect(() => {

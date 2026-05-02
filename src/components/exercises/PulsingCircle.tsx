@@ -78,7 +78,7 @@ export default function PulsingCircle({
         {/* Text sits on top, outside the animated view, so it never scales */}
         <View style={styles.textOverlay} pointerEvents="none">
           <Text style={styles.countdownText}>{countdown}</Text>
-          <Text style={styles.phaseText}>{isHolding ? 'HOLD' : isResting ? 'REST' : phase === 'relax' ? 'RELAX' : ''}</Text>
+          <Text style={styles.phaseText}>{isHolding ? 'SQUEEZE' : isResting ? 'REST' : phase === 'relax' ? 'RELEASE' : ''}</Text>
         </View>
       </View>
 
